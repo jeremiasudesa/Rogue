@@ -7,8 +7,8 @@ class Interface:
     """Interface
     Manage the visual representation of the game
     """
-    def __init__(self, Width, Height, Pixel):
-        self.Width, self.Height, self.Pixel = Width, Height, Pixel
+    def __init__(self, Height, Width, Pixel):
+        self.Height, self.Width, self.Pixel = Height, Width, Pixel
         self.surf = pygame.display.set_mode((self.Width, self.Height))
         self.sprites = None
 

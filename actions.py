@@ -1,12 +1,17 @@
-# from typing import Union
+from typing import Union
 
 
-# import mapping
-# import player
+import mapping
+import player
 
 
-# numeric = Union[int, float]
+numeric = Union[int, float]
 
+
+def set_pvector(player, direction, angle):
+    print(f"hola {direction}")
+    player.changeDir(direction, angle)
+    
 
 # def clip(value: numeric, minimum: numeric, maximum: numeric) -> numeric:
 #     if value < minimum:
