@@ -16,4 +16,4 @@ class Sprite(pygame.sprite.Sprite):
         self.angle += angle
 
     def setPos(self, pos, step):
-        self.rect.center = (pos[0] * step, pos[1] * step)
+        self.rect.center = ((pos[1]+1) * step, (pos[0]+1) * step)

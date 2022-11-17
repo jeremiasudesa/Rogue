@@ -17,9 +17,10 @@ class Interface:
         sets background image based on color map
         """
         self.bg = pygame.Surface((self.Width, self.Height))
-        for i in range(len(map)):
-            for j in range(len(map[0])):
-                pygame.draw.rect(self.bg, map[i][j].color, pygame.Rect(self.Pixel*i, self.Pixel*j, self.Pixel*(i+1), self.Pixel*(j+1)))
+        n, m = len(map), len(map[0])
+        for i in range(n):
+            for j in range(m):
+                pygame.draw.rect(self.bg, map[i][j].color, pygame.Rect(j * self.Pixel, self.Pixel * i,self.Pixel, self.Pixel))
     
     def setSprites(self, sprite_group):
         """Set Sprites
@@ -33,4 +34,4 @@ class Interface:
         """
         self.surf.blit(self.bg, (0,0))
         if(not self.sprites == None):self.sprites.draw(self.surf)
-        pygame.display.flip()
+        pygame.display.update()

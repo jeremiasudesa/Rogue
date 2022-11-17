@@ -21,13 +21,12 @@ class Tile:
     char (str) -- string of length 1 that is rendered when rendering a map.
     walkable (bool) -- states if the tile is walkable or not.
     """
-    __colors = [[0, 0, 51],[0, 94, 184], [160, 160, 160],[96, 96, 96],[32, 32, 32]]
-    __heights = [-1, 0.35, 0.5, 0.65, 0.8]
+    __colors = [[0, 50, 80],[0, 71, 171],[0, 94, 184], [90,90,90], [110,110,110], [169,169,169], [192,192,192], [211,211,211], [220,220,220]]
+    __heights = [-1, 0.38, 0.44, 0.5, 0.63, 0.75, 0.8, 0.83, 0.85]
     def __pickColor(self, num):
         return self.__colors[bisect.bisect_left(self.__heights, num)-1]
 
-    def __init__(self, noise, walkable):
-        self.walkable = walkable
+    def __init__(self, noise):
         self.color = self.__pickColor(noise)
 
 #create directions
@@ -38,11 +37,51 @@ for x in range(-1, 2):
             continue
         directions.append((x, y))
 
-AIR = 0
-WALL = 1
-STAIR_UP = 2
-STAIR_DOWN = 3
-PLAYER = 4
+AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER = range(5)
+
+class NoiseMap:
+    """NoiseMap(rows:int, columns:int, zoom:int, seed:int)
+    Arguments
+
+    rows (int) -- is the number of rows for the map
+    columns (int) -- is the number of columns for the map
+    zoom (float) -- the amount of zoom for the map construction
+    seed (int) -- map seed
+    pos (list) -- offset position
+    
+    Returns OpenSimplex Noise map 
+    """
+    def __init__(self, rows:int, columns:int, zoom:float, seed:int, pos:int):
+        self.rows, self.columns, self.zoom, self.seed, self.pos = rows, columns, zoom, seed, pos
+        opensimplex.seed(self.seed)
+        self.__map = [[0 for _ in range(self.columns)] for _ in range(self.rows)]
+        for i in range(self.rows):
+            for j in range(self.columns):
+                self.__map[i][j] += (opensimplex.noise2(x = self.zoom*(i - self.pos[0]), y = self.zoom*(j - self.pos[1]))+1)/2
+        
+    def getMap(self):
+        return self.__map
+
+class Chunk:
+    """Chunk(top_left_position: tuple):
+    Arguments
+
+    top_left_position (tuple) -- is the position of the top left tile.
+
+    Returns an instance of a chunk.
+    Every grid computation should be done in the chunk itself, it is like a level
+    """
+    def __init__(self, rows:int, columns:int, top_left:list):
+        #init values
+        self.rows, self.columns = rows, columns
+        #create noise
+        self.noise = NoiseMap(self.rows, self.columns, 0.1, 1234, top_left)
+        self.noisemap = self.noise.getMap()
+        #create tilemap
+        self.state = [[(WALL if self.noisemap[i][j] > 0.5 else AIR) for j in range(columns)] for i in range(rows)]
+        self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
+
+
 
 class Level:
     """Level(rows: int, columns: int) -> Level
@@ -56,18 +95,9 @@ class Level:
     """
     def __init__(self, rows: int, columns: int):
         """Initializes a dungeon level class. See class documentation."""
-        #init values
-        self.rows, self.columns = rows, columns
-        #create noise
-        zoom = 0.1
-        opensimplex.seed(1234)
-        noise = [[0 for _ in range(columns)] for _ in range(rows)]
-        for i in range(rows):
-            for j in range(columns):
-                noise[i][j] += (opensimplex.noise2(x = zoom*i, y = zoom*j)+1)/2
-        #create tilemap
-        self.state = [[0 for _ in range(columns)] for _ in range(rows)]
-        self.tilemap = [[Tile(noise[i][j], (False if noise[i][j] > 0.5 else True)) for j in range(columns)] for i in range(rows)]
+        self.curr_chunk = Chunk(rows, columns, [0, 0])
+        self.right, self.left, self.up, self.down = None, None, None, None
+        self.state, self.tilemap = self.curr_chunk.state, self.curr_chunk.tilemap
 
     def find_free_tile(self) -> Location:
         """Searches one by one until it finds a free tile
@@ -112,8 +142,8 @@ class Level:
 
     def is_walkable(self, location: Location):
         """Check if a player can walk through a given location."""
-        j, i = location
-        return self.state[i % self.rows][j % self.columns].walkable
+        i, j = location
+        return (self.state[i][j] != WALL)
 
     def index(self, tile: Tile) -> Location:
         """Get the location of a given tile in the map. If there are multiple tiles of that type, then only one is
