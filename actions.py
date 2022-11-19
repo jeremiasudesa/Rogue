@@ -8,7 +8,7 @@ import os
 
 numeric = Union[int, float]
 
-#TODO: UPDATE MAP-PLAYER REPRESENTATION
+#TODO: UPDATE level-PLAYER REPRESENTATION
 
 #define player directions
 angles = [270, 0, 180, 90]
@@ -28,27 +28,59 @@ def handle_player_dir(player, key):
     player.changeDir([dirdict[key][0][0]*player.speed, dirdict[key][0][1]], dirdict[key][1])
 
 def set_pvector(player, direction, angle):
-    print(f"hola {direction}")
     player.changeDir(direction, angle)
 
-def paint_player(player, map):
+def paint_player(player, level):
     for pos in player.posarray:
-        map.state[pos[0]][pos[1]] = mapping.PLAYER
+        level.state[pos[0]][pos[1]] = mapping.PLAYER
 
-def update_playpos(player, map):
+def nxt_chunk(level, dir, interface):
+    '''
+    Handle possible next chunk directions and pass it to the chunk object itself
+    '''
+    match dir[0]:
+        case "U":
+            level.upChunk(dir[1])
+            level.update_map_chunk(level.curr_chunk.up)
+        case "D":
+            level.downChunk(dir[1])
+            level.update_map_chunk(level.curr_chunk.down)
+        case "L":
+            level.leftChunk(dir[1])
+            level.update_map_chunk(level.curr_chunk.left)
+        case "R":
+            level.rightChunk(dir[1])
+            level.update_map_chunk(level.curr_chunk.right)
+    interface.setBackground(level.tilemap)
+
+
+def update_playpos(player, level, interface):
     """Update Player Position
     Updates the player's sprite position and the player representation in tilemap
     """
+    #find next position
+    nxtpos = player.nxtPosarray(player.dir)
+    #check if player is trying to go outside the chunk
+    dir = level.findBorder(nxtpos)
+    if(dir[0] != "I"):
+        nxt_chunk(level, dir, interface)
+        chunkdir = [-dir[1][1], -dir[1][0]]
+        print(nxtpos)
+        print(dir[1])
+        nxtpos = player.nxtPosarray(dir[1])
+        print(nxtpos)
+        player.updatePos(nxtpos)
+        paint_player(player, level)
+        return
+    #movement
     if(player.moving == False):return
-    nxtposarray = []
+    for pos in nxtpos:
+        if(level.is_walkable(pos) == False):return
+    #TODO: hacer funcion clear_entity()
     for pos in player.posarray:
-        trypos = (player.dir[0] + pos[0], player.dir[1] + pos[1])
-        if(map.is_walkable(trypos) == False):return
-        nxtposarray.append(trypos)
-    for pos in player.posarray:
-        map.state[pos[0]][pos[1]] = mapping.AIR
-    player.updatePos(nxtposarray)
-    paint_player(player, map)
+        level.state[pos[0]][pos[1]] = mapping.AIR
+    player.updatePos(nxtpos)
+    paint_player(player, level)
 
 # def clip(value: numeric, minimum: numeric, maximum: numeric) -> numeric:
 #     if value < minimum:

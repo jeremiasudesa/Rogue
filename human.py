@@ -5,7 +5,7 @@ import pygame
 #TODO: probablemente eliminar la clase player y remplazarla por human
 
 class Human(Player):
-    def __init__(self, name, pos, step, speed, moving = False):
+    def __init__(self, name, pos, step, speed, moving = 0):
         super().__init__(name, pos,'niupat.png', 50)
         self.weapon = None
         self.treasure = None
@@ -17,6 +17,19 @@ class Human(Player):
         self.sprite.setPos(self.pos, self.step)
         self.speed = speed
         self.posarray = [pos,[pos[0], pos[1]+speed], [pos[0]+speed, pos[1]], [pos[0]+speed, pos[1]+speed]]
+
+    def __plusDir(self, pos:tuple, dir):
+        return [pos[0] + dir[0], pos[1] + dir[1]]
+
+    def nxtPosarray(self, dir):
+        '''
+        Returns the next position if player moves along direction
+        '''
+        ret = []
+        for pos in self.posarray:
+            trypos = self.__plusDir(pos, dir)
+            ret.append(trypos)
+        return ret
 
     def updatePos(self, posarray):
         #move based on direction

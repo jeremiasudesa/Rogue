@@ -10,6 +10,7 @@ class Player:
         self.max_hp = hit_points
         self.sprite = Sprite(path)
 
+
     def loc(self):
         return self.pos
 

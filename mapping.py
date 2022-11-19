@@ -22,7 +22,7 @@ class Tile:
     walkable (bool) -- states if the tile is walkable or not.
     """
     __colors = [[0, 50, 80],[0, 71, 171],[0, 94, 184], [90,90,90], [110,110,110], [169,169,169], [192,192,192], [211,211,211], [220,220,220]]
-    __heights = [-1, 0.38, 0.44, 0.5, 0.63, 0.75, 0.8, 0.83, 0.85]
+    __heights = [-1, 0.4, 0.44, 0.5, 0.63, 0.7, 0.8, 0.83, 0.85]
     def __pickColor(self, num):
         return self.__colors[bisect.bisect_left(self.__heights, num)-1]
 
@@ -71,9 +71,11 @@ class Chunk:
     Returns an instance of a chunk.
     Every grid computation should be done in the chunk itself, it is like a level
     """
-    def __init__(self, rows:int, columns:int, top_left:list):
+    def __init__(self, rows:int, columns:int, top_left:list, id):
+        self.id = id
         #init values
-        self.rows, self.columns = rows, columns
+        self.rows, self.columns, self.origin = rows, columns, top_left
+        self.right, self.left, self.up, self.down = None, None, None, None
         #create noise
         self.noise = NoiseMap(self.rows, self.columns, 0.1, 1234, top_left)
         self.noisemap = self.noise.getMap()
@@ -95,9 +97,60 @@ class Level:
     """
     def __init__(self, rows: int, columns: int):
         """Initializes a dungeon level class. See class documentation."""
-        self.curr_chunk = Chunk(rows, columns, [0, 0])
-        self.right, self.left, self.up, self.down = None, None, None, None
-        self.state, self.tilemap = self.curr_chunk.state, self.curr_chunk.tilemap
+        self.update_map_chunk(Chunk(rows, columns, [0, 0], 0))
+        self.rows, self.columns = rows, columns
+
+    def update_map_chunk(self, chunk):
+        self.curr_chunk, self.state, self.tilemap = chunk, chunk.state, chunk.tilemap
+    
+    def newChunk(self, dir):
+        print((self.curr_chunk.origin, dir))
+        new_tl = [self.curr_chunk.origin[0] + dir[0], self.curr_chunk.origin[1] + dir[1]]
+        return Chunk(self.rows, self.columns, new_tl, -1)
+
+    def rightChunk(self, dir):
+        if(self.curr_chunk.right != None):return
+        right_c = self.newChunk(dir)
+        right_c.left = self.curr_chunk
+        self.curr_chunk.right = right_c
+
+    def leftChunk(self, dir):
+        if(self.curr_chunk.left != None):
+            return
+        left_c = self.newChunk(dir)
+        left_c.right = self.curr_chunk
+        self.curr_chunk.left = left_c
+
+    def downChunk(self, dir):
+        if(self.curr_chunk.down != None):return
+        down_c = self.newChunk(dir)
+        down_c.up = self.curr_chunk
+        self.curr_chunk.down = down_c
+
+    def upChunk(self, dir):
+        if(self.curr_chunk.up != None):return
+        up_c = self.newChunk(dir)
+        up_c.down = self.curr_chunk
+        self.curr_chunk.up = up_c
+
+    def whereIsPos(self, pos):
+        ret = ["I"]
+        if(pos[0] == self.rows):
+            ret = ["D", [-self.rows+1, 0]]
+        if(pos[0] == -1):
+            ret = ["U", [self.rows-2, 0]]
+        if(pos[1] == self.columns):
+            ret = ["R", [0, -self.columns+1]]
+        if(pos[1] == -1):
+            ret = ["L", [0, self.columns-2]]
+        return ret
+
+    def findBorder(self, posarr):
+        ret = ["I"]
+        for pos in posarr:
+            where = self.whereIsPos(pos)
+            if(not where[0] == "I"):ret = where
+        return ret
 
     def find_free_tile(self) -> Location:
         """Searches one by one until it finds a free tile

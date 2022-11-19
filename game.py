@@ -13,28 +13,28 @@ from interface import Interface
 
 PIXEL = 20
 ROWS = 50
-COLUMNS = 90
+COLUMNS = 50
 WIDTH = COLUMNS*PIXEL
 HEIGHT = ROWS*PIXEL
-TRESHOLD = 20000
+TRESHOLD = 15000
 iterations = 0
 
 if __name__ == "__main__":
+    interface = Interface(HEIGHT, WIDTH, PIXEL)
     pygame.init()
-    map = mapping.Level(ROWS, COLUMNS)
+    level = mapping.Level(ROWS, COLUMNS)
     #TODO:change player spawnpoint
     pos = [8, 2]
     player = Human("Lancelot", pos, PIXEL, 1)
-    actions.update_playpos(player, map)
-    actions.paint_player(player, map)
+    actions.update_playpos(player, level, interface)
+    actions.paint_player(player, level)
     #create sprite group
     group = pygame.sprite.RenderPlain()
     group.add(player.sprite)
     #visual interface
-    interface = Interface(HEIGHT, WIDTH, PIXEL)
     interface.setSprites(group)
     #game loop pastor con maiz
-    interface.setBackground(map.tilemap)
+    interface.setBackground(level.tilemap)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                     actions.handle_player_dir(player,event.key)
         if(iterations == TRESHOLD):
             iterations = 0
-            actions.update_playpos(player, map)
+            actions.update_playpos(player, level, interface)
             interface.render()
         else:
             iterations += 1
