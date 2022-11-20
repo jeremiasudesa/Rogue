@@ -53,6 +53,16 @@ def nxt_chunk(level, dir, interface):
             level.update_map_chunk(level.curr_chunk.right)
     interface.setBackground(level.tilemap)
 
+#esto es HORRIBLE, pero se puede ignorar
+def update_door(door, level, group):
+    if(level.curr_chunk.id == 0):
+        if(not door.visible):
+            door.sprite.setPos(door.pos,door.step)
+            door.visible = True
+    else:
+        if(door.visible):
+            door.sprite.setPos((-100, -100), door.step)
+            door.visible = False
 
 def update_playpos(player, level, interface):
     """Update Player Position
@@ -78,8 +88,6 @@ def update_playpos(player, level, interface):
         level.state[pos[0]][pos[1]] = mapping.AIR
         #level.tilemap[pos[0]][pos[1]].color = [0, 0, 0]
     player.updatePos(nxtpos)
-    #solo podes entrar al siguiente nivel si matas enemigos
-    #chunk central hacer hub
     paint_player(player, level)
 
 # def clip(value: numeric, minimum: numeric, maximum: numeric) -> numeric:

@@ -81,13 +81,13 @@ class Chunk:
         self.noise = NoiseMap(self.rows, self.columns, 0.065, 11, top_left)
         self.noisemap = self.noise.getMap()
         #create tilemap
-        if(start):
-            self.state = [[AIR for _ in range(columns)] for _ in range(rows)]
-            self.tilemap = [[Tile(-1) for j in range(columns)] for i in range(rows)]
-            return
         self.state = [[(WALL if self.noisemap[i][j] > 0.5 else AIR) for j in range(columns)] for i in range(rows)]
         self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
-
+        if(start):
+            for i in range(self.rows//5, self.rows-self.rows//5):
+                for j in range(self.columns//5, self.columns-self.columns//5):
+                    self.state[i][j] = AIR
+                    self.tilemap[i][j] = Tile(-1)
 
 
 class Level:

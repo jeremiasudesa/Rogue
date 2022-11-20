@@ -30,8 +30,6 @@ if __name__ == "__main__":
     pos = level.spawn
     player = Human("Lancelot", pos, PIXEL, 1)
     door1, door2 = Door(1, 2, level.downStair, PIXEL), Door(1, 0, level.upStair, PIXEL)
-    actions.update_playpos(player, level, interface)
-    actions.paint_player(player, level)
     #create sprite group
     group = pygame.sprite.RenderPlain()
     group.add(player.sprite)
@@ -42,6 +40,7 @@ if __name__ == "__main__":
     #game loop pastor con maiz
     interface.setBackground(level.tilemap)
     pygame.mouse.set_visible(False)
+    #TODO: game_elements dictionary
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -62,6 +61,8 @@ if __name__ == "__main__":
                 music.play_song("end.mp3")
             iterations = 0
             actions.update_playpos(player, level, interface)
+            actions.update_door(door1, level, group)
+            actions.update_door(door2, level, group)
             interface.render()
         else:
             iterations += 1
