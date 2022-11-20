@@ -11,13 +11,14 @@ import actions
 import pygame
 from interface import Interface
 import music
+from door import Door
 
-PIXEL = 20
-ROWS = 50
-COLUMNS = 90
+PIXEL = 10
+ROWS = 90
+COLUMNS = 120
 WIDTH = COLUMNS*PIXEL
 HEIGHT = ROWS*PIXEL
-FRAME = 15000
+FRAME = 10000
 iterations = 0
 song_freq = 1000
 
@@ -26,13 +27,16 @@ if __name__ == "__main__":
     pygame.init()
     level = mapping.Level(ROWS, COLUMNS)
     #TODO:change player spawnpoint
-    pos = [8, 2]
+    pos = level.spawn
     player = Human("Lancelot", pos, PIXEL, 1)
+    door1, door2 = Door(1, 2, level.downStair, PIXEL), Door(1, 0, level.upStair, PIXEL)
     actions.update_playpos(player, level, interface)
     actions.paint_player(player, level)
     #create sprite group
     group = pygame.sprite.RenderPlain()
     group.add(player.sprite)
+    group.add(door1.sprite)
+    group.add(door2.sprite)
     #visual interface
     interface.setSprites(group)
     #game loop pastor con maiz

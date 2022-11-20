@@ -72,15 +72,19 @@ class Chunk:
     Returns an instance of a chunk.
     Every grid computation should be done in the chunk itself, it is like a level
     """
-    def __init__(self, rows:int, columns:int, top_left:list, id):
+    def __init__(self, rows:int, columns:int, top_left:list, id, start = False):
         self.id = id
         #init values
         self.rows, self.columns, self.origin = rows, columns, top_left
         self.right, self.left, self.up, self.down = None, None, None, None
         #create noise
-        self.noise = NoiseMap(self.rows, self.columns, 0.065, 1210, top_left)
+        self.noise = NoiseMap(self.rows, self.columns, 0.065, 11, top_left)
         self.noisemap = self.noise.getMap()
         #create tilemap
+        if(start):
+            self.state = [[AIR for _ in range(columns)] for _ in range(rows)]
+            self.tilemap = [[Tile(-1) for j in range(columns)] for i in range(rows)]
+            return
         self.state = [[(WALL if self.noisemap[i][j] > 0.5 else AIR) for j in range(columns)] for i in range(rows)]
         self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
 
@@ -98,8 +102,16 @@ class Level:
     """
     def __init__(self, rows: int, columns: int):
         """Initializes a dungeon level class. See class documentation."""
-        self.update_map_chunk(Chunk(rows, columns, [0, 0], 0))
+        self.update_map_chunk(Chunk(rows, columns, [0, 0], 0, True))
         self.rows, self.columns = rows, columns
+        #define elements locations
+        self.initLoc()
+
+    def initLoc(self):
+        center = [self.rows//2, self.columns//2]
+        self.spawn = center
+        self.upStair = [center[0]+10, center[1]-10]
+        self.downStair = [center[0]-10, center[1]+10]
 
     def update_map_chunk(self, chunk):
         self.curr_chunk, self.state, self.tilemap = chunk, chunk.state, chunk.tilemap
