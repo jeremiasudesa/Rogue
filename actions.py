@@ -65,10 +65,7 @@ def update_playpos(player, level, interface):
     if(dir[0] != "I"):
         nxt_chunk(level, dir, interface)
         chunkdir = [-dir[1][1], -dir[1][0]]
-        print(nxtpos)
-        print(dir[1])
         nxtpos = player.nxtPosarray(dir[1])
-        print(nxtpos)
         player.updatePos(nxtpos)
         paint_player(player, level)
         return
@@ -79,7 +76,10 @@ def update_playpos(player, level, interface):
     #TODO: hacer funcion clear_entity()
     for pos in player.posarray:
         level.state[pos[0]][pos[1]] = mapping.AIR
+        #level.tilemap[pos[0]][pos[1]].color = [0, 0, 0]
     player.updatePos(nxtpos)
+    #solo podes entrar al siguiente nivel si matas enemigos
+    #chunk central hacer hub
     paint_player(player, level)
 
 # def clip(value: numeric, minimum: numeric, maximum: numeric) -> numeric:

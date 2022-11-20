@@ -62,6 +62,7 @@ class NoiseMap:
     def getMap(self):
         return self.__map
 
+#TODO: corregir error de memoria... complejidad O(4*n)
 class Chunk:
     """Chunk(top_left_position: tuple):
     Arguments
@@ -77,7 +78,7 @@ class Chunk:
         self.rows, self.columns, self.origin = rows, columns, top_left
         self.right, self.left, self.up, self.down = None, None, None, None
         #create noise
-        self.noise = NoiseMap(self.rows, self.columns, 0.1, 1234, top_left)
+        self.noise = NoiseMap(self.rows, self.columns, 0.1, 12000, top_left)
         self.noisemap = self.noise.getMap()
         #create tilemap
         self.state = [[(WALL if self.noisemap[i][j] > 0.5 else AIR) for j in range(columns)] for i in range(rows)]
@@ -104,7 +105,6 @@ class Level:
         self.curr_chunk, self.state, self.tilemap = chunk, chunk.state, chunk.tilemap
     
     def newChunk(self, dir):
-        print((self.curr_chunk.origin, dir))
         new_tl = [self.curr_chunk.origin[0] + dir[0], self.curr_chunk.origin[1] + dir[1]]
         return Chunk(self.rows, self.columns, new_tl, -1)
 
