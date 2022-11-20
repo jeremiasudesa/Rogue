@@ -10,14 +10,16 @@ from items import Item
 import actions
 import pygame
 from interface import Interface
+import music
 
 PIXEL = 20
 ROWS = 50
 COLUMNS = 90
 WIDTH = COLUMNS*PIXEL
 HEIGHT = ROWS*PIXEL
-TRESHOLD = 15000
+FRAME = 15000
 iterations = 0
+song_freq = 1000
 
 if __name__ == "__main__":
     interface = Interface(HEIGHT, WIDTH, PIXEL)
@@ -35,6 +37,7 @@ if __name__ == "__main__":
     interface.setSprites(group)
     #game loop pastor con maiz
     interface.setBackground(level.tilemap)
+    pygame.mouse.set_visible(False)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -47,7 +50,12 @@ if __name__ == "__main__":
                 if(event.key in (actions.keys)):
                     player.moving += 1 
                     actions.handle_player_dir(player,event.key)
-        if(iterations == TRESHOLD):
+        if(iterations == FRAME):
+            #TODO: turn this into a music.py functionality
+            #MUSIC
+            num = random.randint(0, song_freq)
+            if(num == 0 and music.music_channel.get_busy() == False):
+                music.play_song("end.mp3")
             iterations = 0
             actions.update_playpos(player, level, interface)
             interface.render()
