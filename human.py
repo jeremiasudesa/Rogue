@@ -14,7 +14,7 @@ class Human(Player):
         self.moving = moving
         self.dir = [0, 0]
         self.step = step
-        self.sprite.setPos(self.pos, self.step)
+        self.sprite.setPos(self.pos)
         self.speed = speed
         self.posarray = [pos,[pos[0], pos[1]+speed], [pos[0]+speed, pos[1]], [pos[0]+speed, pos[1]+speed]]
 
@@ -34,7 +34,7 @@ class Human(Player):
     def updatePos(self, posarray):
         #move based on direction
         self.posarray = posarray
-        self.sprite.setPos(self.posarray[0], self.step)
+        self.sprite.setPos(self.posarray[0])
 
     def changeDir(self, dir, desired_angle):
         self.dir = dir

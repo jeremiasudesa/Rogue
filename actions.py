@@ -8,7 +8,7 @@ import os
 
 numeric = Union[int, float]
 
-#TODO: UPDATE level-PLAYER REPRESENTATION
+#TODO: UPDATE gc['level']-PLAYER REPRESENTATION
 
 #define player directions
 angles = [270, 0, 180, 90]
@@ -30,114 +30,78 @@ def handle_player_dir(player, key):
 def set_pvector(player, direction, angle):
     player.changeDir(direction, angle)
 
-def paint_player(player, level):
-    for pos in player.posarray:
-        level.state[pos[0]][pos[1]] = mapping.PLAYER
+def paint_player(gc):
+    for pos in gc['entities']['player'].posarray:
+        gc['level'].state[pos[0]][pos[1]] = mapping.PLAYER
 
-def nxt_chunk(level, dir, interface):
+def paint_door(gc, door):
+    gc['level'].state[door.pos[0]][door.pos[1]] = mapping.STAIR_DOWN
+
+def nxt_chunk(gc, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
     match dir[0]:
         case "U":
-            level.upChunk(dir[1])
-            level.update_map_chunk(level.curr_chunk.up)
+            gc['level'].upChunk(dir[1])
+            gc['level'].update_map_chunk(gc['level'].curr_chunk.up)
         case "D":
-            level.downChunk(dir[1])
-            level.update_map_chunk(level.curr_chunk.down)
+            gc['level'].downChunk(dir[1])
+            gc['level'].update_map_chunk(gc['level'].curr_chunk.down)
         case "L":
-            level.leftChunk(dir[1])
-            level.update_map_chunk(level.curr_chunk.left)
+            gc['level'].leftChunk(dir[1])
+            gc['level'].update_map_chunk(gc['level'].curr_chunk.left)
         case "R":
-            level.rightChunk(dir[1])
-            level.update_map_chunk(level.curr_chunk.right)
-    interface.setBackground(level.tilemap)
+            gc['level'].rightChunk(dir[1])
+            gc['level'].update_map_chunk(gc['level'].curr_chunk.right)
+    gc['interface'].setBackground(gc['level'].tilemap)
+
+def add_sprites(sprite_group, entity_list):
+    for entity in entity_list.values():
+        sprite_group.add(entity.sprite)
+
+def nxt_level(gc, dir):
+    print("no implementado aun")
+    #gc['level'] = mapping.Level(gc['level'].rows, gc['level'].columns, 10)
 
 #esto es HORRIBLE, pero se puede ignorar
-def update_door(door, level, group):
-    if(level.curr_chunk.id == 0):
+def update_door(gc, door):
+    if(gc['level'].curr_chunk.id == 0):
         if(not door.visible):
-            door.sprite.setPos(door.pos,door.step)
+            door.sprite.setPos(door.pos)
             door.visible = True
     else:
         if(door.visible):
-            door.sprite.setPos((-100, -100), door.step)
+            door.sprite.setPos((-100, -100))
             door.visible = False
+    paint_door(gc, door)
 
-def update_playpos(player, level, interface):
+def update_playpos(gc):
     """Update Player Position
     Updates the player's sprite position and the player representation in tilemap
     """
     #find next position
-    nxtpos = player.nxtPosarray(player.dir)
+    nxtpos = gc['entities']['player'].nxtPosarray(gc['entities']['player'].dir)
     #check if player is trying to go outside the chunk
-    dir = level.findBorder(nxtpos)
+    dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != "I"):
-        nxt_chunk(level, dir, interface)
+        nxt_chunk(gc, dir)
         chunkdir = [-dir[1][1], -dir[1][0]]
-        nxtpos = player.nxtPosarray(dir[1])
-        player.updatePos(nxtpos)
-        paint_player(player, level)
+        nxtpos = gc['entities']['player'].nxtPosarray(dir[1])
+        gc['entities']['player'].updatePos(nxtpos)
+        paint_player(gc)
         return
     #movement
-    if(player.moving == False):return
+    if(gc['entities']['player'].moving == False):return
     for pos in nxtpos:
-        if(level.is_walkable(pos) == False):return
+        if(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_DOWN):
+            nxt_level(gc['level'], "d")
+        elif(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_UP):
+            nxt_level(gc['level'], "d")
+        elif(gc['level'].is_walkable(pos) == False):return
     #TODO: hacer funcion clear_entity()
-    for pos in player.posarray:
-        level.state[pos[0]][pos[1]] = mapping.AIR
-        #level.tilemap[pos[0]][pos[1]].color = [0, 0, 0]
-    player.updatePos(nxtpos)
-    paint_player(player, level)
-
-# def clip(value: numeric, minimum: numeric, maximum: numeric) -> numeric:
-#     if value < minimum:
-#         return minimum
-#     if value > maximum:
-#         return maximum
-#     return value
-
-
-# #def attack(dungeon, player, ...): # completar
-#     # completar
-# #    raise NotImplementedError
-
-
-# # def move_to(dungeon: mapping.Dungeon, player: player.Player, location: tuple[numeric, numeric]):
-# #     # completar
-# #     raise NotImplementedError
-
-
-# # def move_up(dungeon: mapping.Dungeon, player: player.Player):
-# #     # completar
-# #     raise NotImplementedError
-
-
-# def move_down(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
-
-
-# def move_left(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
-
-
-# def move_right(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
-
-
-# def climb_stair(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
-
-
-# def descend_stair(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
-
-
-# def pickup(dungeon: mapping.Dungeon, player: player.Player):
-#     # completar
-#     raise NotImplementedError
+    for pos in gc['entities']['player'].posarray:
+        gc['level'].state[pos[0]][pos[1]] = mapping.AIR
+        #gc['level'].tilemap[pos[0]][pos[1]].color = [0, 0, 0]
+    gc['entities']['player'].updatePos(nxtpos)
+    paint_player(gc)
