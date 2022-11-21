@@ -1,10 +1,8 @@
-import random
-from player import Player
-import pygame
+from entity import Entity
 
 #TODO: probablemente eliminar la clase player y remplazarla por human
 
-class Human(Player):
+class Human(Entity):
     def __init__(self, name, pos, step, speed, moving = 0):
         super().__init__(name, pos,'niupat.png', 50)
         self.weapon = None

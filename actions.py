@@ -2,9 +2,7 @@ from typing import Union
 
 
 import mapping
-import player
 import pygame
-import os
 
 numeric = Union[int, float]
 
