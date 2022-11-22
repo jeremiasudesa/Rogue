@@ -24,12 +24,13 @@ def handle_player_dir(player, key):
 def set_pvector(player, direction, angle):
     player.changeDir(direction, angle)
 
-def paint_player(gc):
-    for pos in gc['entities']['player'].posarray:
-        gc['level'].state[pos[0]][pos[1]] = mapping.PLAYER
+def paint_posarray(lvl, posarray, tile):
+    for pos in posarray:
+        lvl.state[pos[0]][pos[1]] = tile
 
-def paint_door(gc, door, tile):
-    gc['level'].state[door.pos[0]][door.pos[1]] = tile
+def clear_posarray(lvl, posarray):
+    for pos in posarray:
+        lvl.state[pos[0]][pos[1]] = mapping.AIR
 
 def nxt_chunk(gc, dir):
     '''
@@ -55,13 +56,10 @@ def add_sprites(sprite_group, entity_list):
         sprite_group.add(entity.sprite)
 
 def nxt_level(gc, dir):
-    print(dir)
     if(gc['level'].adj_level[dir] == None):
         gc['level'].adj_level[dir] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
         gc['level'].adj_level[dir].adj_level['d' if (dir == 'u') else 'u'] = gc['level']
     gc['level'] = gc['level'].adj_level[dir]
-    print(gc['level'].seed)
-    #TODO: hacer que el player respawnee
     gc['interface'].setBackground(gc['level'].tilemap)
     pos = gc['level'].spawn
     gc['entities']['player'].posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
@@ -73,11 +71,12 @@ def update_door(gc, door, type):
         if(not door.visible):
             door.sprite.setPos(door.pos)
             door.visible = True
+        paint_posarray(gc['level'], door.posarray, (mapping.STAIR_DOWN if type else mapping.STAIR_UP))
     else:
         if(door.visible):
             door.sprite.setPos((-100, -100))
             door.visible = False
-    paint_door(gc, door, (mapping.STAIR_DOWN if type else mapping.STAIR_UP))
+        clear_posarray(gc['level'], door.posarray)
 
 def update_playpos(gc):
     """Update Player Position
@@ -92,7 +91,7 @@ def update_playpos(gc):
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = gc['entities']['player'].nxtPosarray(dir[1])
         gc['entities']['player'].updatePos(nxtpos)
-        paint_player(gc)
+        paint_posarray(gc['level'], gc['entities']['player'].posarray, mapping.PLAYER)
         return
     #movement
     if(gc['entities']['player'].moving == False):return
@@ -105,8 +104,6 @@ def update_playpos(gc):
             return
         elif(gc['level'].is_walkable(pos) == False):return
     #TODO: hacer funcion clear_entity()
-    for pos in gc['entities']['player'].posarray:
-        gc['level'].state[pos[0]][pos[1]] = mapping.AIR
-        #gc['level'].tilemap[pos[0]][pos[1]].color = [0, 0, 0]
+    clear_posarray(gc['level'], gc['entities']['player'].posarray)
     gc['entities']['player'].updatePos(nxtpos)
-    paint_player(gc)
+    paint_posarray(gc['level'], gc['entities']['player'].posarray, mapping.PLAYER)

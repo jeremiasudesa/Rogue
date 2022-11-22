@@ -8,6 +8,7 @@ class Item:
         self.type = type
         self.sprite = Sprite(path, pos)
         self.sprite.setPos(pos)
+        self.posarray = []
 
 class Door(Item):
     def __init__(self, level_a, level_b, pos, step):
@@ -19,6 +20,7 @@ class Door(Item):
         super().__init__('DOOR', pos, sprite_path)
         self.sprite.setPos(pos)
         self.visible = True
+        self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1],[pos[0]+2, pos[1]], [pos[0]+2, pos[1]+1], [pos[0]+3, pos[1]], [pos[0]+3, pos[1]+1]]
     
 
 # class Sword(Item):
