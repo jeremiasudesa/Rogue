@@ -32,7 +32,7 @@ def initInteface(gc):
     gc['interface'].setBackground(gc['level'].tilemap)
 
 def initLevel(gc):
-    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 0)
+    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 1)
 
 if __name__ == "__main__":
     #Pygame
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 sys.exit()
             if event.type == pygame.KEYUP and (event.key in (actions.keys)):            # check for key releases
                 ge['player'].moving -=  1
-            if event.type == pygame.KEYDOWN:          # check for key presses 
+            if event.type == pygame.KEYDOWN:          # check for key prXesses 
                 if(event.key in (actions.keys)):
                     ge['player'].moving += 1 
                     actions.handle_player_dir(ge['player'],event.key)

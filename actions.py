@@ -4,10 +4,6 @@ from typing import Union
 import mapping
 import pygame
 
-numeric = Union[int, float]
-
-#TODO: UPDATE gc['level']-PLAYER REPRESENTATION
-
 #define player directions
 angles = [270, 0, 180, 90]
 dirs = []
@@ -59,8 +55,9 @@ def add_sprites(sprite_group, entity_list):
         sprite_group.add(entity.sprite)
 
 def nxt_level(gc, dir):
-    print("no implementado aun")
-    #gc['level'] = mapping.Level(gc['level'].rows, gc['level'].columns, 10)
+    gc['level'] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
+    gc['interface'].setBackground(gc['level'].tilemap)
+    #TODO: hacer que el player respawnee
 
 #esto es HORRIBLE, pero se puede ignorar
 def update_door(gc, door):
@@ -93,7 +90,7 @@ def update_playpos(gc):
     if(gc['entities']['player'].moving == False):return
     for pos in nxtpos:
         if(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_DOWN):
-            nxt_level(gc['level'], "d")
+            nxt_level(gc, "d")
         elif(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_UP):
             nxt_level(gc['level'], "d")
         elif(gc['level'].is_walkable(pos) == False):return
