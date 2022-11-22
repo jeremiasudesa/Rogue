@@ -19,7 +19,7 @@ for i in range(len(keys)):
     dirdict[keys[i]] = dirs[i]
 
 def handle_player_dir(player, key):
-    player.changeDir([dirdict[key][0][0]*player.speed, dirdict[key][0][1]], dirdict[key][1])
+    player.changeDir([dirdict[key][0][0], dirdict[key][0][1]], dirdict[key][1])
 
 def set_pvector(player, direction, angle):
     player.changeDir(direction, angle)
@@ -28,8 +28,8 @@ def paint_player(gc):
     for pos in gc['entities']['player'].posarray:
         gc['level'].state[pos[0]][pos[1]] = mapping.PLAYER
 
-def paint_door(gc, door):
-    gc['level'].state[door.pos[0]][door.pos[1]] = mapping.STAIR_DOWN
+def paint_door(gc, door, tile):
+    gc['level'].state[door.pos[0]][door.pos[1]] = tile
 
 def nxt_chunk(gc, dir):
     '''
@@ -55,12 +55,20 @@ def add_sprites(sprite_group, entity_list):
         sprite_group.add(entity.sprite)
 
 def nxt_level(gc, dir):
-    gc['level'] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
-    gc['interface'].setBackground(gc['level'].tilemap)
+    print(dir)
+    if(gc['level'].adj_level[dir] == None):
+        gc['level'].adj_level[dir] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
+        gc['level'].adj_level[dir].adj_level['d' if (dir == 'u') else 'u'] = gc['level']
+    gc['level'] = gc['level'].adj_level[dir]
+    print(gc['level'].seed)
     #TODO: hacer que el player respawnee
+    gc['interface'].setBackground(gc['level'].tilemap)
+    pos = gc['level'].spawn
+    gc['entities']['player'].posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
+    update_playpos(gc)
 
 #esto es HORRIBLE, pero se puede ignorar
-def update_door(gc, door):
+def update_door(gc, door, type):
     if(gc['level'].curr_chunk.id == 0):
         if(not door.visible):
             door.sprite.setPos(door.pos)
@@ -69,7 +77,7 @@ def update_door(gc, door):
         if(door.visible):
             door.sprite.setPos((-100, -100))
             door.visible = False
-    paint_door(gc, door)
+    paint_door(gc, door, (mapping.STAIR_DOWN if type else mapping.STAIR_UP))
 
 def update_playpos(gc):
     """Update Player Position
@@ -90,9 +98,11 @@ def update_playpos(gc):
     if(gc['entities']['player'].moving == False):return
     for pos in nxtpos:
         if(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_DOWN):
-            nxt_level(gc, "d")
+            nxt_level(gc, 'd')
+            return
         elif(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_UP):
-            nxt_level(gc['level'], "d")
+            nxt_level(gc, 'u')
+            return
         elif(gc['level'].is_walkable(pos) == False):return
     #TODO: hacer funcion clear_entity()
     for pos in gc['entities']['player'].posarray:

@@ -98,7 +98,8 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.update_map_chunk(Chunk(rows, columns, [0, 0], 0, seed, True))
-        self.rows, self.columns, self.seed = rows, columns, seed
+        self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
+        self.adj_level['u'], self.adj_level['d'] = None, None
         #define elements locations
         self.initLoc()
 

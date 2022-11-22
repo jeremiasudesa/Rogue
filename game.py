@@ -18,7 +18,7 @@ def initPygame():
     pygame.mouse.set_visible(False)
 
 def initEntities(ge):
-    ge['player'] = Human("Lancelot", gc['level'].spawn, const.PIXEL, 1)
+    ge['player'] = Human("Lancelot", gc['level'].spawn, const.PIXEL)
     ge['door1'], ge['door2'] = Door(1, 2, gc['level'].downStair, const.PIXEL), Door(1, 0, gc['level'].upStair, const.PIXEL)
 
 def initInteface(gc):
@@ -67,8 +67,8 @@ if __name__ == "__main__":
                 music.play_song("end.mp3")
             iterations = 0
             actions.update_playpos(gc)
-            actions.update_door(gc, ge['door1'])
-            actions.update_door(gc, ge['door2'])
+            actions.update_door(gc, ge['door1'], False)
+            actions.update_door(gc, ge['door2'], True)
             gc['interface'].render()
         else:
             iterations += 1
