@@ -4,7 +4,7 @@ import sys
 
 import random
 from human import Human
-from items import Door
+from items import Door, Pickaxe
 import actions
 import pygame
 from interface import Interface
@@ -18,15 +18,16 @@ def initPygame():
     pygame.mouse.set_visible(False)
 
 def initEntities(ge):
-    ge['player'] = Human("Lancelot", gc['level'].spawn, const.PIXEL)
-    ge['door1'], ge['door2'] = Door(1, 2, gc['level'].downStair, const.PIXEL), Door(1, 0, gc['level'].upStair, const.PIXEL)
+    ge['player'] = Human("Lancelot", gc['level'].spawn)
+    ge['door1'], ge['door2'] = Door(1, 2, gc['level'].downStair), Door(1, 0, gc['level'].upStair)
+    ge['pick'] = Pickaxe(gc['level'].pickaxe)
 
 def initInteface(gc):
     #Interface
     gc['interface'] = Interface()
     #create sprite group
     gc['sprite_group'] = pygame.sprite.RenderPlain()
-    actions.add_sprites(gc['sprite_group'], (gc['entities']))
+    actions.add_sprites(gc['sprite_group'], (gc['elems']))
     #visual interface
     gc['interface'].setSprites(gc['sprite_group'])
     gc['interface'].setBackground(gc['level'].tilemap)
@@ -42,8 +43,8 @@ if __name__ == "__main__":
     #Level
     initLevel(gc)
     #Entities
-    gc['entities'] = {}
-    ge = gc['entities']
+    gc['elems'] = {}
+    ge = gc['elems']
     initEntities(ge)
     #Interface
     initInteface(gc)
@@ -59,6 +60,8 @@ if __name__ == "__main__":
                 if(event.key in (actions.keys)):
                     ge['player'].moving += 1 
                     actions.handle_player_dir(ge['player'],event.key)
+                if(event.key == pygame.K_p):
+                    actions.activate_destruction_mode(gc['player'])
         if(iterations == const.FRAME):
             #TODO: turn this into a music.py functionality
             #MUSIC
@@ -66,9 +69,11 @@ if __name__ == "__main__":
             if(num == 0 and music.music_channel.get_busy() == False):
                 music.play_song("end.mp3")
             iterations = 0
-            actions.update_playpos(gc)
-            actions.update_door(gc, ge['door1'], False)
-            actions.update_door(gc, ge['door2'], True)
+            #Loopify
+            actions.update_player(gc)
+            actions.update_door(gc['level'], ge['door1'], False)
+            actions.update_door(gc['level'], ge['door2'], True)
+            actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
             gc['interface'].render()
         else:
             iterations += 1

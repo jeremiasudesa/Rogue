@@ -3,17 +3,13 @@ from entity import Entity
 #TODO: probablemente eliminar la clase player y remplazarla por human
 
 class Human(Entity):
-    def __init__(self, name, pos, step, moving = 0):
+    def __init__(self, name, pos, moving = 0):
         super().__init__(name, pos,'niupat.png', 50)
-        self.weapon = None
-        self.treasure = None
-        self.tool = None
-        self.alive = True
-        self.moving = moving
-        self.dir = [0, 0]
-        self.step = step
+        self.weapon, self.treasure, self.tool, self.alive, self.moving, self.dir = None, None, None, True, moving, [0, 0]
+        self.destructionMode = False
         self.sprite.setPos(self.pos)
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
+    
 
     def __plusDir(self, pos:tuple, dir):
         return [pos[0] + dir[0], pos[1] + dir[1]]
