@@ -86,12 +86,10 @@ def update_door(level, door, type):
     """
     update_item_visibility(level, door)
     if(door.sprite.rect.center[0] < 0 and door.represented == True):
-        print("clear_posarray")
         clear_posarray(level, door.posarray)
         door.represented = False
 
     elif(door.sprite.rect.center[0] >= 0 and door.represented == False):
-        print("paint_posarray")
         paint_posarray(level, door.posarray, (mapping.STAIR_DOWN if type else mapping.STAIR_UP))
         door.represented = True
 
@@ -102,8 +100,8 @@ def update_pickaxe_sprite(player, pickaxe):
     pickaxe.sprite.rect.center = pac + offset.rotate(pickaxe.angle)
 
 def update_pickaxe(level, pickaxe, player):
-    if(pickaxe.picked):
-        update_pickaxe_sprite(player, pickaxe)
+    if(player.destructionMode):update_pickaxe_sprite(player, pickaxe)
+    if(pickaxe.picked):return
     update_item_visibility(level, pickaxe)
     paint_posarray(level, pickaxe.posarray, mapping.PICKAXE)
 
@@ -112,10 +110,13 @@ def pick_pickaxe(level, player, pickaxe):
     pickaxe.picked, pickaxe.visible = True, False
     clear_posarray(level, pickaxe.posarray)
     pickaxe.sprite.setPos((-100, -100))
-    activate_destruction_mode(player)
 
-def activate_destruction_mode(player):
-    player.destructionMode = True
+def use_pickaxe(player, pickaxe):
+    if(pickaxe.picked == False):return
+    player.destructionMode = True - player.destructionMode
+    if(not player.destructionMode):
+        pickaxe.sprite.setPos((-100, -100))
+        pickaxe.visible = False
 
 def destroy_walls(level, player, interface):
     nxt_pos = player.nxtPosarray(player.dir)

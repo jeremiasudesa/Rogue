@@ -61,7 +61,7 @@ if __name__ == "__main__":
                     ge['player'].moving += 1 
                     actions.handle_player_dir(ge['player'],event.key)
                 if(event.key == pygame.K_p):
-                    actions.activate_destruction_mode(gc['player'])
+                    actions.use_pickaxe(ge['player'], ge['pick'])
         if(iterations == const.FRAME):
             #TODO: turn this into a music.py functionality
             #MUSIC

@@ -13,6 +13,7 @@ class Item:
         self.represented = False
         self.visible = False
         self.pos = pos
+        self.gone = False
 
 class Door(Item):
     def __init__(self, level_a, level_b, pos):
