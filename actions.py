@@ -36,19 +36,8 @@ def nxt_chunk(gc, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
-    match dir[0]:
-        case "U":
-            gc['level'].upChunk(dir[1])
-            gc['level'].update_map_chunk(gc['level'].curr_chunk.up)
-        case "D":
-            gc['level'].downChunk(dir[1])
-            gc['level'].update_map_chunk(gc['level'].curr_chunk.down)
-        case "L":
-            gc['level'].leftChunk(dir[1])
-            gc['level'].update_map_chunk(gc['level'].curr_chunk.left)
-        case "R":
-            gc['level'].rightChunk(dir[1])
-            gc['level'].update_map_chunk(gc['level'].curr_chunk.right)
+    gc['level'].newChunk(dir[1], dir[0])
+    gc['level'].update_map_chunk(gc['level'].curr_chunk.adj_chunks[dir[0]])
     gc['interface'].setBackground(gc['level'].tilemap)
 
 def add_sprites(sprite_group, entity_list):
@@ -90,7 +79,7 @@ def update_door(level, door, type):
         door.represented = False
 
     elif(door.sprite.rect.center[0] >= 0 and door.represented == False):
-        paint_posarray(level, door.posarray, (mapping.STAIR_DOWN if type else mapping.STAIR_UP))
+        paint_posarray(level, door.posarray, (mapping.STAIR_UP if type else mapping.STAIR_DOWN))
         door.represented = True
 
 def update_pickaxe_sprite(player, pickaxe):
@@ -121,8 +110,8 @@ def use_pickaxe(player, pickaxe):
 def destroy_walls(level, player, interface):
     nxt_pos = player.nxtPosarray(player.dir)
     for x in nxt_pos:
-        if(x in player.posarray or level.whereIsPos(x)[0] != "I"):continue
-        if(level.state[x[0]][x[1]] != mapping.WALL):continue
+        if(x in player.posarray or level.whereIsPos(x)[0] != 0):continue
+        if(level.loc(x) != mapping.WALL):continue
         level.state[x[0]][x[1]] = mapping.AIR
         level.tilemap[x[0]][x[1]].color = [0, 94, 184]
         interface.setBackground(level.tilemap)
@@ -139,7 +128,7 @@ def update_playpos(gc):
     nxtpos = gc['elems']['player'].nxtPosarray(gc['elems']['player'].dir)
     #check if player is trying to go outside the chunk
     dir = gc['level'].findBorder(nxtpos)
-    if(dir[0] != "I"):
+    if(dir[0] != 0):
         nxt_chunk(gc, dir)
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = gc['elems']['player'].nxtPosarray(dir[1])
@@ -150,15 +139,18 @@ def update_playpos(gc):
     #TODO: make switch
     if(gc['elems']['player'].moving == False):return
     for pos in nxtpos:
-        if(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_DOWN):
-            nxt_level(gc, 'd')
-            return
-        elif(gc['level'].state[pos[0]][pos[1]] == mapping.STAIR_UP):
-            nxt_level(gc, 'u')
-            return
-        elif(gc['level'].state[pos[0]][pos[1]] == mapping.PICKAXE):
-            pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
-        elif(gc['level'].is_walkable(pos) == False):return
+        posloc = gc['level'].loc(pos)
+        match posloc:
+            case mapping.STAIR_DOWN:
+                nxt_level(gc, 'd')
+                return
+            case mapping.STAIR_UP:
+                nxt_level(gc, 'u')
+                return
+            case mapping.PICKAXE:
+                pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
+            case _:
+                if(gc['level'].is_walkable(pos) == False):return
     #TODO: hacer funcion clear_entity()
     clear_posarray(gc['level'], gc['elems']['player'].posarray)
     gc['elems']['player'].updatePos(nxtpos)
