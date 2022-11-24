@@ -98,6 +98,7 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
+        self.enemy_probability = seed*0.001
         self.adj_level['u'], self.adj_level['d'] = None, None
         #define elements locations
         self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))

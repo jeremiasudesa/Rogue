@@ -4,6 +4,8 @@ from pygame.math import Vector2
 import mapping
 import pygame
 import const
+import random
+from enemy import Enemy
 
 #define player directions
 keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
@@ -35,7 +37,11 @@ def nxt_chunk(gc, dir):
 
 def add_sprites(sprite_group, entity_list):
     for entity in entity_list.values():
-        sprite_group.add(entity.sprite)
+        if(type(entity) == list):
+            for x in entity:
+                sprite_group.add(x.sprite)
+        else:
+            sprite_group.add(entity.sprite)
 
 def nxt_level(gc, dir):
     if(gc['level'].adj_level[dir] == None):
@@ -129,7 +135,6 @@ def update_playpos(gc):
         paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
         return
     #movement
-    #TODO: make switch
     if(gc['elems']['player'].moving == False):return
     for pos in nxtpos:
         posloc = gc['level'].loc(pos)
@@ -144,7 +149,19 @@ def update_playpos(gc):
                 pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
-    #TODO: hacer funcion clear_entity()
     clear_posarray(gc['level'], gc['elems']['player'].posarray)
     gc['elems']['player'].updatePos(nxtpos)
     paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
+
+def spawn_enemy_batch(level, player, enemy_list):
+    #arbitrary player position
+    arb_pos = player.posarray[0]
+    #TODO:make function to get components
+    comp_id = level.where[arb_pos[0]][arb_pos[1]]
+    comp = level.components[comp_id]
+    #por cada elemento de comp, decidir si spawnear enemigo
+    for c in comp:
+        if(level.loc(c) == mapping.AIR):
+            chance = random.choices([1, 0], [level.enemy_probability, 1-level.enemy_probability])
+            if(chance[0] == 1):
+                enemy_list.append(Enemy('Global Warming', c))

@@ -14,6 +14,7 @@ class Item:
         self.visible = False
         self.pos = pos
         self.gone = False
+        self.name = "item"
 
 class Door(Item):
     def __init__(self, level_a, level_b, pos):

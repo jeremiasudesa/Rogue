@@ -21,6 +21,7 @@ def initEntities(ge):
     ge['player'] = Human("Lancelot", gc['level'].spawn)
     ge['door1'], ge['door2'] = Door(1, 2, gc['level'].downStair), Door(1, 0, gc['level'].upStair)
     ge['pick'] = Pickaxe(gc['level'].pickaxe)
+    ge['enemies'] = []
 
 def initInteface(gc):
     #Interface
@@ -46,6 +47,7 @@ if __name__ == "__main__":
     gc['elems'] = {}
     ge = gc['elems']
     initEntities(ge)
+    actions.spawn_enemy_batch(gc['level'], ge['player'], ge['enemies'])
     #Interface
     initInteface(gc)
     while True:
