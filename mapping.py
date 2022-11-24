@@ -97,10 +97,10 @@ class Level:
     """
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
-        self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
         self.adj_level['u'], self.adj_level['d'] = None, None
         #define elements locations
+        self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))
         self.initLoc()
 
     def initLoc(self):
@@ -111,7 +111,8 @@ class Level:
         self.pickaxe = [center[0]+5, center[1]]
 
     def update_map_chunk(self, chunk):
-        self.curr_chunk, self.state, self.tilemap = chunk, chunk.state, chunk.tilemap
+        self.curr_chunk, self.state, self.tilemap, self.divided = chunk, chunk.state, chunk.tilemap, False
+        self.divideComponents()
     
     def newChunk(self, dir, side):
         if(self.curr_chunk.adj_chunks[side] != None):return
@@ -144,9 +145,10 @@ class Level:
         """Compute and return a random location in the map."""
         return random.randint(0, self.columns - 1), random.randint(0, self.rows - 1)
 
-    def is_walkable(self, location: Location):
+    def is_walkable(self, location: Location, only_allowed = -1):
         """Check if a player can walk through a given location."""
         i, j = location
+        if(only_allowed != -1):return(self.state[i][j] == only_allowed)
         return (self.state[i][j] != WALL)
 
     def loc(self, xy: Location) -> Tile:
@@ -162,55 +164,47 @@ class Level:
 
         return is_fila_contained and is_columna_contained
 
-    def adjacent_coordinates(self, pos):
+    def adjacent_coordinates(self, pos, allowed):
         '''recieves a matrix, a set of coordinates to evaluate its adjacents, the possible moves and the air and gives the adjacent movable coordinates'''
         list_adjacent_coordinates = []
-        for dir in const.DIRS:
-            new_coordinate = (pos[0]+dir[0], pos[1]+dir[1])
+        for i in range(len(const.DIRS)):
+            new_coordinate = (pos[0]+const.DIRS[i][0], pos[1]+const.DIRS[i][1])
             if self.is_inmatrix(new_coordinate):
-                if self.is_walkable(new_coordinate):
-                    list_adjacent_coordinates.append(new_coordinate)
+                if self.is_walkable(new_coordinate, allowed):
+                    list_adjacent_coordinates.append((new_coordinate, i))
         return list_adjacent_coordinates
 
-    def get_path(self, pos1, pos2, air):
+    def get_path(self, pos1, pos2, component, allowed):
         '''recieves an origin tuple, a goal tuple a matrix and a air and earchs the best path avoiding the airs to get from tuple 1 to tuple 2'''
         visited = [[False for _ in range(self.columns)] for _ in range(self.rows)]
-        queue = [pos1]
-        visited[pos1[0]][pos1[1]] = True
         dirs = [[-1 for _ in range(self.columns)] for _ in range(self.rows)]
+        queue = [pos1]
         while queue:       
             actual = queue.pop(0)
             if actual == pos2:
                 break
-            adjacent_coords = self.adjacent_coordinates(actual)
+            if(visited[actual[0]][actual[1]]):continue
             visited[actual[0]][actual[1]] = True
+            adjacent_coords = self.adjacent_coordinates(actual, allowed)
+            component.append(actual)
             for coords in adjacent_coords:
-                if not(visited[coords[0][0]][coords[0][1]]):
-                    dirs[coords[0][0]][coords[0][1]] = coords[1]
-                    queue.append(coords[0])
+                dirs[coords[0][0]][coords[0][1]] = coords[1]
+                queue.append(coords[0])
         curr = pos2
-        anti_path = []
-        while dirs[curr[0]][curr[1]] != -1:
-            anti_path.append(curr)
-            movimiento = const.DIRS[dirs[curr[0]][curr[1]]]
-            movimiento_inverso = (-movimiento[0],-movimiento[1])
-            curr = (curr[0] + movimiento_inverso[0], curr[1] + movimiento_inverso[1])
-        return anti_path[::-1]
 
-    def pintador_complemento(self, moves):
+    def divideComponents(self):
+        self.components, self.where = [], [[-1 for _ in range(self.columns)] for _ in range(self.rows)]
         visited = [[False for _ in range(self.columns)] for _ in range(self.rows)]
-        i = -1
-        for filas in range(len(visited)):
-            for columnas in range(len(visited[filas])):
-                if visited[filas][columnas] == False:
-                    i+=1
-                    queue = []
-                    queue.append((filas, columnas))
-                    while queue:
-                        actual = queue.pop(0)
-                        adjacent_coords = self.adjacent_coordinates(actual)
-                        visited[actual[0]][actual[1]] = True
-                        for coords in adjacent_coords:
-                            if not(visited[coords[0]][coords[1]]):
-                                queue.append(coords)
-                        self.state[actual[0]][actual[1]] = i
+        comp = -1
+        for i in range(self.rows):
+            for j in range(self.columns):
+                if visited[i][j] == False:
+                    visited[i][j] = True
+                    comp+=1
+                    self.components.append([])
+                    self.get_path((i, j), (-1,-1), self.components[comp], self.state[i][j])
+                    for x in self.components[comp]:
+                        # print((x[0], x[1]), end="")
+                        self.where[x[0]][x[1]] = comp
+                        visited[x[0]][x[1]] = True
+        self.divided = True
