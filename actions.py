@@ -3,20 +3,13 @@ from pygame.math import Vector2
 
 import mapping
 import pygame
+import const
 
 #define player directions
-angles = [270, 0, 180, 90]
-dirs = []
-it = 0
-for i in range(-1, 2):
-    for j in range(-1, 2):
-        if(abs(i+j) == 1):
-            dirs.append(((i, j), angles[it]))
-            it+=1
 keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
 dirdict = {}
 for i in range(len(keys)):
-    dirdict[keys[i]] = dirs[i]
+    dirdict[keys[i]] = (const.DIRS[i], const.ANGLES[i])
 
 def handle_player_dir(player, key):
     player.changeDir([dirdict[key][0][0], dirdict[key][0][1]], dirdict[key][1])
