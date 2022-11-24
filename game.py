@@ -76,6 +76,7 @@ if __name__ == "__main__":
             actions.update_door(gc['level'], ge['door1'], False)
             actions.update_door(gc['level'], ge['door2'], True)
             actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
+            actions.update_enemies(gc['level'], ge['enemies'], ge['player'])
             gc['interface'].render()
         else:
             iterations += 1

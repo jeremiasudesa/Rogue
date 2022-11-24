@@ -9,27 +9,4 @@ class Human(Entity):
         self.destructionMode = False
         self.sprite.setPos(self.pos)
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
-    
-
-    def __plusDir(self, pos:tuple, dir):
-        return [pos[0] + dir[0], pos[1] + dir[1]]
-
-    def nxtPosarray(self, dir):
-        '''
-        Returns the next position if player moves along direction
-        '''
-        ret = []
-        for pos in self.posarray:
-            trypos = self.__plusDir(pos, dir)
-            ret.append(trypos)
-        return ret
-
-    def updatePos(self, posarray):
-        #move based on direction
-        self.posarray = posarray
-        self.sprite.setPos(self.posarray[0])
-
-    def changeDir(self, dir, desired_angle):
-        self.dir = dir
-        self.sprite.rotate(desired_angle - self.sprite.angle)
 

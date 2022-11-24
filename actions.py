@@ -21,19 +21,21 @@ def set_pvector(player, direction, angle):
 
 def paint_posarray(lvl, posarray, tile):
     for pos in posarray:
-        lvl.state[pos[0]][pos[1]] = tile
+        lvl.state[int(pos[0])][int(pos[1])] = tile
 
 def clear_posarray(lvl, posarray):
     for pos in posarray:
-        lvl.state[pos[0]][pos[1]] = mapping.AIR
+        lvl.state[int(pos[0])][int(pos[1])] = mapping.AIR
 
-def nxt_chunk(gc, dir):
+def updateBakground(interface, level):
+    interface.setBackground(level.tilemap)
+
+def nxt_chunk(level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
-    gc['level'].newChunk(dir[1], dir[0])
-    gc['level'].update_map_chunk(gc['level'].curr_chunk.adj_chunks[dir[0]])
-    gc['interface'].setBackground(gc['level'].tilemap)
+    level.newChunk(dir[1], dir[0])
+    level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
 
 def add_sprites(sprite_group, entity_list):
     for entity in entity_list.values():
@@ -128,7 +130,8 @@ def update_playpos(gc):
     #check if player is trying to go outside the chunk
     dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != 0):
-        nxt_chunk(gc, dir)
+        nxt_chunk(gc['level'], dir)
+        updateBakground(gc['interface'], gc['level'])
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = gc['elems']['player'].nxtPosarray(dir[1])
         gc['elems']['player'].updatePos(nxtpos)
@@ -162,6 +165,38 @@ def spawn_enemy_batch(level, player, enemy_list):
     #por cada elemento de comp, decidir si spawnear enemigo
     for c in comp:
         if(level.loc(c) == mapping.AIR):
+            if(level.whereIsPos((c[0]+1, c[1]+1))[0] != 0):continue
             chance = random.choices([1, 0], [level.enemy_probability, 1-level.enemy_probability])
             if(chance[0] == 1):
-                enemy_list.append(Enemy('Global Warming', c))
+                enemy_list.append(Enemy('Global Warming', c, level.curr_chunk.id))
+                paint_posarray(level, enemy_list[-1].posarray, mapping.ENEMY)
+
+def update_enemy_pos(level, enemy):
+    #find next position
+    nxtpos = enemy.nxtPosarray(enemy.dir)
+    #check if enemy is trying to go outside the chunk
+    dir = level.findBorder(nxtpos)
+    if(dir[0] != 0):
+        enemy.dir = Vector2(1 - 2*random.randint(0, 1), 1 - 2*random.randint(0, 1))
+        return
+    #movement
+    for pos in nxtpos:
+        posloc = level.loc(pos)
+        if(level.is_walkable(pos) == False):
+            enemy.dir = Vector2(1 - 2*random.randint(0, 1), 1 - 2*random.randint(0, 1))
+            return
+    if(enemy.moving == False):return
+    clear_posarray(level, enemy.posarray)
+    enemy.updatePos(nxtpos)
+    paint_posarray(level, enemy.posarray, mapping.PLAYER)
+
+def update_enemies_existence(level, enemies):
+    if(level.curr_chunk.id != enemies[0].origin):
+        for e in enemies:
+            e.sprite.kill()
+        enemies = []
+
+def update_enemies(level, enemies, player):
+    for enemy in enemies:
+        update_enemy_pos(level, enemy)
+    update_enemies_existence(level, enemies)

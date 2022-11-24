@@ -33,7 +33,7 @@ for x in range(-1, 2):
             continue
         directions.append((x, y))
 
-AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE = range(6)
+AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE, ENEMY = range(7)
 
 class NoiseMap:
     """NoiseMap(rows:int, columns:int, zoom:int, seed:int)
@@ -149,13 +149,13 @@ class Level:
     def is_walkable(self, location: Location, only_allowed = -1):
         """Check if a player can walk through a given location."""
         i, j = location
-        if(only_allowed != -1):return(self.state[i][j] == only_allowed)
-        return (self.state[i][j] != WALL)
+        if(only_allowed != -1):return(self.state[int(i)][int(j)] == only_allowed)
+        return (self.state[int(i)][int(j)] != WALL)
 
     def loc(self, xy: Location) -> Tile:
         """Get the tile type at a given location."""
         i, j = xy
-        return self.state[i][j]
+        return self.state[int(i)][int(j)]
 
     def is_inmatrix(self, pos):
         '''given a set of coordinates and a matrix the function gives true if the coordinates are in the matrix'''
