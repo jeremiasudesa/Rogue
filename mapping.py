@@ -98,7 +98,7 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
-        self.enemy_probability = seed*0.00001
+        self.enemy_probability = seed*0.000001
         self.adj_level['u'], self.adj_level['d'] = None, None
         #define elements locations
         self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))
@@ -150,6 +150,7 @@ class Level:
 
     def is_walkable(self, location: Location, only_allowed = -1):
         """Check if a player can walk through a given location."""
+        if(self.whereIsPos(location)[0] != 0):return False
         i, j = location
         if(only_allowed != -1):return(self.state[int(i)][int(j)] == only_allowed)
         return (self.state[int(i)][int(j)] != WALL)

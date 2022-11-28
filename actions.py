@@ -134,6 +134,7 @@ def update_orb_sprite(player, orb):
     offset = Vector2(50,50)
     orb.sprite.rect.center = pac + offset.rotate(orb.angle)
 
+
 def update_orb(level, orb, player):
     #TODO: change to check if it is in player's "using item dictionary"
     if(player.deathPower == True):update_orb_sprite(player, orb)
@@ -141,8 +142,25 @@ def update_orb(level, orb, player):
     update_item_visibility(level, orb)
     paint_posarray(level, orb.posarray, mapping.ORB)
 
-def death_ray(level, player):
-    print("DEATH IS UPON YOU!")
+def get_ray(level, pos, component_id, ray, play_dir, depth):
+    if(depth == 700 or level.where[pos[0]][pos[1]] != component_id):return
+    ray.append(pos)
+    prob = [0.85 if play_dir == const.DIRS[i] else 0.5 for i in range(len(const.DIRS))]
+    curr_dir = random.choices(const.DIRS, prob)[0]
+    new_pos = (pos[0] + curr_dir[0], pos[1] + curr_dir[1])
+    if(level.is_walkable(new_pos)):get_ray(level, new_pos, component_id, ray, play_dir, depth+1)
+
+def death_ray(level, interface, player):
+    #fetch a set of coordinates
+    arbpos = player.posarray[0]
+    for i in range(50):
+        ray = []
+        get_ray(level, arbpos, level.where[arbpos[0]][arbpos[1]], ray, tuple(player.dir), 0)
+        #show it in the inferface
+        interface.showRay(ray)
+        #display death ray text
+        interface.clearRay(ray, level.tilemap)
+        #kill the corresponding enemies
 
 def pick_orb(level, player, orb):
     orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)

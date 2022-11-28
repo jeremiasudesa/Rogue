@@ -1,6 +1,7 @@
 import pygame
 from mapping import Tile
 import const
+import random
 
 Location = tuple[int, int]
 
@@ -63,3 +64,13 @@ class Interface:
         self.fillScreen([255, 0, 0])
         self.createText("GAME OVER", (const.WIDTH//2, const.HEIGHT//2), bgcolor = [255, 0, 0])
 
+    def showRay(self, ray):
+        for cell in ray:
+            wob = random.randint(0, 1)
+            pygame.draw.rect(self.bg, wob*[0, 255, 255] + (1-wob)*[255, 255, 255], pygame.Rect(cell[1] * const.PIXEL, const.PIXEL * cell[0],const.PIXEL, const.PIXEL))
+        self.render()
+
+    def clearRay(self, ray, tilemap):
+        for cell in ray:
+            pygame.draw.rect(self.bg, tilemap[cell[0]][cell[1]].color, pygame.Rect(cell[1] * const.PIXEL, const.PIXEL * cell[0],const.PIXEL, const.PIXEL))
+        self.render()

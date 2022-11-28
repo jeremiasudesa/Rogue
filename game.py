@@ -51,6 +51,7 @@ if __name__ == "__main__":
     #Interface
     initInterface(gc)
     while True:
+        #TODO: EVENT SWITCH
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
@@ -61,9 +62,12 @@ if __name__ == "__main__":
             if event.type == pygame.KEYDOWN:          # check for key prXesses 
                 if(event.key in (actions.keys)):
                     ge['player'].moving += 1 
+                    ge['player'].dir = tuple(const.DIRS[actions.keys.index(event.key)])
                     actions.handle_player_dir(ge['player'],event.key)
-                if(event.key == pygame.K_p):
+                elif(event.key == pygame.K_p):
                     actions.use_pickaxe(ge['player'], ge['pick'])
+                elif(event.key == pygame.K_SPACE):
+                    if(ge['player'].deathPower):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                 elif(event.key == pygame.K_o):
                     actions.use_orb(gc['level'], ge['player'], ge['orb'])
         if(iterations == const.FRAME):
