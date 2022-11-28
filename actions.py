@@ -8,6 +8,7 @@ import random
 from enemy import Enemy
 import sys
 import time
+import music
 
 #define player directions
 #TODO: distinction between regular keys and number_keys
@@ -184,10 +185,12 @@ def create_question():
     a, b = random.randint(0, const.DIFFICULTY), random.randint(0, const.DIFFICULTY)
     return (f"What is {a} * {b}?", a*b)
 
+#TODO: todas las funciones deberian ser de actions
 
-def game_over():
-    print("game over!")
-    time.sleep(3)
+def game_over(interface):
+    music.play_song("end.mp3")
+    interface.gameOver()
+    time.sleep(8)
     pygame.display.quit()
     pygame.quit()
     sys.exit()
@@ -195,7 +198,7 @@ def game_over():
 #TODO (importante): hacer una funcion que se llame "get keys" para no repetir codigo o algo por el estilo
 
 def combat(level, interface, player, enemy):
-    interface.blackOut()
+    interface.fillScreen([0, 0, 0])
     question = create_question()
     interface.createQuestionText(question[0])
     curr, currect = "", None
@@ -217,7 +220,7 @@ def combat(level, interface, player, enemy):
                     currect = interface.writeUserInput(curr)
                 if(event.key == pygame.K_RETURN):
                     if(int(curr) != question[1]):
-                        game_over()
+                        game_over(interface)
                     done = True
     player.moving = 0
     interface.setBackground(level.tilemap)

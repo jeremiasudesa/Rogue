@@ -36,13 +36,13 @@ class Interface:
         if(not self.sprites == None):self.sprites.draw(self.surf)
         pygame.display.update()
     
-    def blackOut(self):
-        pygame.draw.rect(self.bg, [0, 0, 0], pygame.Rect(0, 0, const.WIDTH, const.HEIGHT))
+    def fillScreen(self, color):
+        pygame.draw.rect(self.bg, color, pygame.Rect(0, 0, const.WIDTH, const.HEIGHT))
         self.render()
     
-    def createText(self, text, center):
+    def createText(self, text, center, color = [255, 255, 255], bgcolor = [0, 0, 0]):
         font = pygame.font.Font('freesansbold.ttf', 32)
-        text = font.render(text, True, [255, 255, 255], [0, 0, 0])
+        text = font.render(text, True, color, bgcolor)
         textRect = text.get_rect()
         textRect.center = center
         self.surf.blit(text, textRect)
@@ -58,3 +58,8 @@ class Interface:
     def clearText(self, rect):
         pygame.draw.rect(self.surf, [0, 0, 0], rect)
         pygame.display.update()
+
+    def gameOver(self):
+        self.fillScreen([255, 0, 0])
+        self.createText("GAME OVER", (const.WIDTH//2, const.HEIGHT//2), bgcolor = [255, 0, 0])
+
