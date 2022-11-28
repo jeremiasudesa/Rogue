@@ -20,8 +20,7 @@ def initPygame():
 
 def initEntities(ge):
     ge['player'] = Human("Lancelot", gc['level'].spawn)
-    ge['door1'], ge['door2'] = Door(1, 2, gc['level'].downStair), Door(1, 0, gc['level'].upStair)
-    ge['pick'] = Pickaxe(gc['level'].pickaxe)
+    actions.initLevelItems(ge, gc['level'])
     ge['enemies'] = []
 
 def initInterface(gc):
@@ -65,6 +64,8 @@ if __name__ == "__main__":
                     actions.handle_player_dir(ge['player'],event.key)
                 if(event.key == pygame.K_p):
                     actions.use_pickaxe(ge['player'], ge['pick'])
+                elif(event.key == pygame.K_o):
+                    actions.use_orb(gc['level'], ge['player'], ge['orb'])
         if(iterations == const.FRAME):
             #TODO: turn this into a music.py functionality
             #MUSIC
@@ -78,6 +79,7 @@ if __name__ == "__main__":
             actions.update_door(gc['level'], ge['door1'], False)
             actions.update_door(gc['level'], ge['door2'], True)
             actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
+            actions.update_orb(gc['level'], ge['orb'], ge['player'])
             gc['interface'].render()
         else:
             iterations += 1

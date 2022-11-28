@@ -9,8 +9,14 @@ from enemy import Enemy
 import sys
 import time
 import music
+import items
 
-#define player directions
+def initLevelItems(ge, level):
+    ge['door1'], ge['door2'] = items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
+    if(level.pickaxe != None): ge['pick'] = items.Pickaxe(level.pickaxe)
+    if(level.orb != None): ge['orb'] = items.Orb(level.orb)
+
+
 #TODO: distinction between regular keys and number_keys
 keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
 number_keys = [pygame.K_0,pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9]
@@ -93,6 +99,8 @@ def update_door(level, door, type):
         paint_posarray(level, door.posarray, (mapping.STAIR_UP if type else mapping.STAIR_DOWN))
         door.represented = True
 
+#TODO: generalize pickup functions, create pickup class
+#PICKAXE FUNCTIONS
 def update_pickaxe_sprite(player, pickaxe):
     pickaxe.angle -= 7
     pic, pac = pickaxe.sprite.rect.center, player.sprite.rect.center
@@ -117,6 +125,37 @@ def use_pickaxe(player, pickaxe):
     if(not player.destructionMode):
         pickaxe.sprite.setPos((-100, -100))
         pickaxe.visible = False
+
+#VERY IMPORTANT TODO: generalize pickup functions!!!
+#ORB functions
+def update_orb_sprite(player, orb):
+    orb.angle -= 7
+    pic, pac = orb.sprite.rect.center, player.sprite.rect.center
+    offset = Vector2(50,50)
+    orb.sprite.rect.center = pac + offset.rotate(orb.angle)
+
+def update_orb(level, orb, player):
+    #TODO: change to check if it is in player's "using item dictionary"
+    if(player.deathPower == True):update_orb_sprite(player, orb)
+    if(orb.picked):return
+    update_item_visibility(level, orb)
+    paint_posarray(level, orb.posarray, mapping.ORB)
+
+def death_ray(level, player):
+    print("DEATH IS UPON YOU!")
+
+def pick_orb(level, player, orb):
+    orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
+    orb.picked, orb.visible = True, False
+    clear_posarray(level, orb.posarray)
+    orb.sprite.setPos((-100, -100))
+
+def use_orb(level, player, orb):
+    if(orb.picked == False):return
+    player.deathPower = True - player.deathPower
+    if(not player.deathPower):
+        orb.sprite.setPos((-100, -100))
+        orb.visible = False
 
 def destroy_walls(level, player, interface):
     nxt_pos = player.nxtPosarray(player.dir)
@@ -149,6 +188,7 @@ def update_playpos(gc):
         paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
         return
     #movement
+    #TODO: inside definition of ge
     if(gc['elems']['player'].moving == False):return
     for pos in nxtpos:
         posloc = gc['level'].loc(pos)
@@ -161,6 +201,8 @@ def update_playpos(gc):
                 return
             case mapping.PICKAXE:
                 pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
+            case mapping.ORB:
+                pick_orb(gc['level'], gc['elems']['player'], gc['elems']['orb'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
     clear_posarray(gc['level'], gc['elems']['player'].posarray)
