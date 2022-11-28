@@ -35,3 +35,26 @@ class Interface:
         self.surf.blit(self.bg, (0,0))
         if(not self.sprites == None):self.sprites.draw(self.surf)
         pygame.display.update()
+    
+    def blackOut(self):
+        pygame.draw.rect(self.bg, [0, 0, 0], pygame.Rect(0, 0, const.WIDTH, const.HEIGHT))
+        self.render()
+    
+    def createText(self, text, center):
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        text = font.render(text, True, [255, 255, 255], [0, 0, 0])
+        textRect = text.get_rect()
+        textRect.center = center
+        self.surf.blit(text, textRect)
+        pygame.display.update()
+        return textRect
+    
+    def createQuestionText(self, text):
+        self.createText(text, (const.WIDTH//2, const.HEIGHT//2))
+    
+    def writeUserInput(self, userstr):
+        return self.createText(userstr, (const.WIDTH//2, const.HEIGHT//2 + 100))
+    
+    def clearText(self, rect):
+        pygame.draw.rect(self.surf, [0, 0, 0], rect)
+        pygame.display.update()

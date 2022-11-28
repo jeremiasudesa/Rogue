@@ -16,6 +16,7 @@ iterations = 0
 def initPygame():
     pygame.init()
     pygame.mouse.set_visible(False)
+    pygame.display.set_caption('Duck Rogue')
 
 def initEntities(ge):
     ge['player'] = Human("Lancelot", gc['level'].spawn)
@@ -23,18 +24,18 @@ def initEntities(ge):
     ge['pick'] = Pickaxe(gc['level'].pickaxe)
     ge['enemies'] = []
 
-def initInteface(gc):
+def initInterface(gc):
     #Interface
     gc['interface'] = Interface()
     #create sprite group
     gc['sprite_group'] = pygame.sprite.RenderPlain()
-    actions.add_sprites(gc['sprite_group'], (gc['elems']))
+    actions.add_sprites_from_dict(gc['sprite_group'], (gc['elems']))
     #visual interface
     gc['interface'].setSprites(gc['sprite_group'])
     gc['interface'].setBackground(gc['level'].tilemap)
 
 def initLevel(gc):
-    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 1)
+    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 100)
 
 if __name__ == "__main__":
     #Pygame
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     initEntities(ge)
     actions.spawn_enemy_batch(gc['level'], ge['player'], ge['enemies'])
     #Interface
-    initInteface(gc)
+    initInterface(gc)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -72,11 +73,11 @@ if __name__ == "__main__":
                 music.play_song("end.mp3")
             iterations = 0
             #Loopify
+            actions.update_enemies(gc)
             actions.update_player(gc)
             actions.update_door(gc['level'], ge['door1'], False)
             actions.update_door(gc['level'], ge['door2'], True)
             actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
-            actions.update_enemies(gc['level'], ge['enemies'], ge['player'])
             gc['interface'].render()
         else:
             iterations += 1

@@ -6,9 +6,13 @@ import pygame
 import const
 import random
 from enemy import Enemy
+import sys
+import time
 
 #define player directions
+#TODO: distinction between regular keys and number_keys
 keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
+number_keys = [pygame.K_0,pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9]
 dirdict = {}
 for i in range(len(keys)):
     dirdict[keys[i]] = (const.DIRS[i], const.ANGLES[i])
@@ -30,20 +34,25 @@ def clear_posarray(lvl, posarray):
 def updateBakground(interface, level):
     interface.setBackground(level.tilemap)
 
-def nxt_chunk(level, dir):
+#TURN EVERY GAME COMPONENT INTO A GLOBAL VARIABLE
+
+def nxt_chunk(gc, level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
     level.newChunk(dir[1], dir[0])
     level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
 
-def add_sprites(sprite_group, entity_list):
+def add_sprites(sprite_group, entity):
+    if(type(entity) == list):
+        for x in entity:
+            sprite_group.add(x.sprite)
+    else:
+        sprite_group.add(entity.sprite)
+
+def add_sprites_from_dict(sprite_group, entity_list):
     for entity in entity_list.values():
-        if(type(entity) == list):
-            for x in entity:
-                sprite_group.add(x.sprite)
-        else:
-            sprite_group.add(entity.sprite)
+        add_sprites(sprite_group, entity)
 
 def nxt_level(gc, dir):
     if(gc['level'].adj_level[dir] == None):
@@ -121,6 +130,7 @@ def update_player(gc):
     update_playpos(gc)
     if(gc['elems']['player'].destructionMode):destroy_walls(gc['level'], gc['elems']['player'], gc['interface'])
 
+
 def update_playpos(gc):
     """Update Player Position
     Updates the player's sprite position and the player representation in tilemap
@@ -130,7 +140,7 @@ def update_playpos(gc):
     #check if player is trying to go outside the chunk
     dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != 0):
-        nxt_chunk(gc['level'], dir)
+        nxt_chunk(gc, gc['level'], dir)
         updateBakground(gc['interface'], gc['level'])
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = gc['elems']['player'].nxtPosarray(dir[1])
@@ -157,24 +167,66 @@ def update_playpos(gc):
     paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
 
 def spawn_enemy_batch(level, player, enemy_list):
-    #arbitrary player position
     arb_pos = player.posarray[0]
-    #TODO:make function to get components
-    comp_id = level.where[arb_pos[0]][arb_pos[1]]
-    comp = level.components[comp_id]
-    #por cada elemento de comp, decidir si spawnear enemigo
-    for c in comp:
-        if(level.loc(c) == mapping.AIR):
-            if(level.whereIsPos((c[0]+1, c[1]+1))[0] != 0):continue
+    for i in range(level.rows):
+        for j in range(level.columns):
+            loc1, loc2 = level.loc((i, j)), level.loc((i+1, j+1))
+            if(loc1 != mapping.AIR or loc2 != mapping.AIR):continue
             chance = random.choices([1, 0], [level.enemy_probability, 1-level.enemy_probability])
             if(chance[0] == 1):
-                enemy_list.append(Enemy('Global Warming', c, level.curr_chunk.id))
-                paint_posarray(level, enemy_list[-1].posarray, mapping.ENEMY)
+                #change const file to variables file
+                const.enemies += 1
+                newEnemy = Enemy(f'Global Warming, {const.enemies}', (i, j), (level.curr_chunk.id, level.seed))
+                enemy_list.append(newEnemy)
+                paint_posarray(level, newEnemy.posarray, mapping.ENEMY)
 
-def update_enemy_pos(level, enemy):
+def create_question():
+    a, b = random.randint(0, const.DIFFICULTY), random.randint(0, const.DIFFICULTY)
+    return (f"What is {a} * {b}?", a*b)
+
+
+def game_over():
+    print("game over!")
+    time.sleep(3)
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()
+
+#TODO (importante): hacer una funcion que se llame "get keys" para no repetir codigo o algo por el estilo
+
+def combat(level, interface, player, enemy):
+    interface.blackOut()
+    question = create_question()
+    interface.createQuestionText(question[0])
+    curr, currect = "", None
+    done = False
+    while (done == False):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.display.quit()
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:          # check for key presses 
+                if(event.key in number_keys):
+                    curr += str(number_keys.index(event.key))
+                    currect = interface.writeUserInput(curr)
+                elif(event.key == pygame.K_BACKSPACE):
+                    if(len(curr) == 0):continue
+                    curr = curr.rstrip(curr[-1])
+                    interface.clearText(currect)
+                    currect = interface.writeUserInput(curr)
+                if(event.key == pygame.K_RETURN):
+                    if(int(curr) != question[1]):
+                        game_over()
+                    done = True
+    player.moving = 0
+    interface.setBackground(level.tilemap)
+
+def update_enemy_pos(level, interface, enemy, player):
+    if(enemy == None):return
     #find next position
     nxtpos = enemy.nxtPosarray(enemy.dir)
-    #check if enemy is trying to go outside the chunk
+    # check if enemy is trying to go outside the chunk
     dir = level.findBorder(nxtpos)
     if(dir[0] != 0):
         enemy.dir = Vector2(1 - 2*random.randint(0, 1), 1 - 2*random.randint(0, 1))
@@ -182,21 +234,39 @@ def update_enemy_pos(level, enemy):
     #movement
     for pos in nxtpos:
         posloc = level.loc(pos)
+        if(posloc == mapping.PLAYER):
+            combat(level, interface, player, enemy)
+            clear_posarray(level, enemy.posarray)
+            enemy.sprite.kill()
+            enemy.hp = 0
+            return
         if(level.is_walkable(pos) == False):
             enemy.dir = Vector2(1 - 2*random.randint(0, 1), 1 - 2*random.randint(0, 1))
             return
     if(enemy.moving == False):return
     clear_posarray(level, enemy.posarray)
     enemy.updatePos(nxtpos)
-    paint_posarray(level, enemy.posarray, mapping.PLAYER)
+    paint_posarray(level, enemy.posarray, mapping.ENEMY)
 
-def update_enemies_existence(level, enemies):
-    if(level.curr_chunk.id != enemies[0].origin):
-        for e in enemies:
-            e.sprite.kill()
-        enemies = []
+def kill_enemies(gc):
+    for enemy in gc['elems']['enemies']:
+        enemy.sprite.kill()
+    gc['elems']['enemies'] = []
 
-def update_enemies(level, enemies, player):
-    for enemy in enemies:
-        update_enemy_pos(level, enemy)
-    update_enemies_existence(level, enemies)
+
+def update_enemies(gc):
+    enems = gc['elems']['enemies']
+    to_delete = []
+    for enemy_ind in range(len(enems)):
+        if(enems[enemy_ind].hp == 0):
+            to_delete.append(enemy_ind)
+            continue
+        update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
+    for ind in to_delete[::-1]:
+        enems.pop(ind)
+    if(len(enems) == 0):
+        spawn_enemy_batch(gc['level'], gc['elems']['player'], enems)
+        add_sprites(gc['sprite_group'], enems)
+        return
+    if(enems[0].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):
+        kill_enemies(gc)

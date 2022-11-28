@@ -98,7 +98,7 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
-        self.enemy_probability = seed*0.001
+        self.enemy_probability = seed*0.00001
         self.adj_level['u'], self.adj_level['d'] = None, None
         #define elements locations
         self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))
@@ -119,7 +119,8 @@ class Level:
         if(self.curr_chunk.adj_chunks[side] != None):return
         opposite = (side - 1 if (side % 2 == 0) else side + 1)
         new_tl = Location([self.curr_chunk.origin[0] + dir[0], self.curr_chunk.origin[1] + dir[1]])
-        new_c = Chunk(self.rows, self.columns, new_tl, -1, self.seed)
+        const.chunks+=1
+        new_c = Chunk(self.rows, self.columns, new_tl, const.chunks, self.seed)
         new_c.adj_chunks[opposite] = self.curr_chunk
         self.curr_chunk.adj_chunks[side] = new_c
 
@@ -154,6 +155,7 @@ class Level:
 
     def loc(self, xy: Location) -> Tile:
         """Get the tile type at a given location."""
+        if(self.whereIsPos(xy)[0] != 0):return None
         i, j = xy
         return self.state[int(i)][int(j)]
 
