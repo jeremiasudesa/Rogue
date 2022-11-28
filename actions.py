@@ -47,7 +47,6 @@ def nxt_chunk(gc, level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
-    if(level.curr_chunk.adj_chunks[dir[0]] == None):gc['player'].chunkCounter+=1
     level.newChunk(dir[1], dir[0])
     level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
 
@@ -154,7 +153,7 @@ def get_ray(level, pos, component_id, ray, play_dir, depth):
 def death_ray(level, interface, player):
     #fetch a set of coordinates
     arbpos = player.posarray[0]
-    for i in range(25):
+    for i in range(50):
         ray = []
         get_ray(level, arbpos, level.where[arbpos[0]][arbpos[1]], ray, tuple(player.dir), 0)
         #show it in the inferface
@@ -165,7 +164,7 @@ def death_ray(level, interface, player):
         for cell in ray:
             if(level.loc(cell) == mapping.ENEMY):
                 enemy = level.locToEnemy[cell]
-                enemy.hp = max(enemy.hp-1, 0)
+                enemy.hp //= 2
 
 def pick_orb(level, player, orb):
     orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
@@ -220,8 +219,7 @@ def update_playpos(gc):
                 nxt_level(gc, 'd')
                 return
             case mapping.STAIR_UP:
-                if(gc['elems']['player'].chunkCounter > 10):nxt_level(gc, 'u')
-                print("not enought smegma!")
+                nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
                 pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
@@ -322,23 +320,24 @@ def update_enemy_pos(level, interface, enemy, player):
 
 def update_enemies(gc):
     enems = gc['elems']['enemies']
-    if(len(enems) == 0):
+    while(len(enems) == 0):
         if(gc['level'].curr_chunk.killed):return
         spawn_enemy_batch(gc['level'], gc['elems']['player'], enems)
         add_sprites(gc['sprite_group'], enems)
-    else:
-        to_delete = []
-        for enemy_ind in range(len(enems)):
-            if(enems[enemy_ind].hp == 0 or enems[enemy_ind].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):
-                to_delete.append(enemy_ind)
-                continue
-            update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
-        for ind in to_delete[::-1]:
-            clear_posarray(gc['level'], enems[ind].posarray)
-            enems[ind].sprite.kill()
-            gc['level'].locToEnemy.pop(enems[ind], None)
-            enems.pop(ind)
-        #Check if you have killed everyone
-        if(len(enems) == 0):
-            gc['level'].curr_chunk.killed = True
-            return
+    to_delete = []
+    changedLevel = False
+    for enemy_ind in range(len(enems)):
+        if(enems[enemy_ind].hp == 0 or enems[enemy_ind].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):
+            if(enems[enemy_ind].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):changedLevel = True
+            to_delete.append(enemy_ind)
+            continue
+        update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
+    for ind in to_delete[::-1]:
+        clear_posarray(gc['level'], enems[ind].posarray)
+        enems[ind].sprite.kill()
+        gc['level'].locToEnemy.pop(enems[ind], None)
+        enems.pop(ind)
+    #Check if you have killed everyone
+    if(len(enems) == 0 and not changedLevel):
+        gc['level'].curr_chunk.killed = True
+        return

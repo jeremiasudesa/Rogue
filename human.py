@@ -10,6 +10,4 @@ class Human(Entity):
         self.destructionMode, self.deathPower = False, False
         self.sprite.setPos(self.pos)
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
-        #count the visited chunks in the level
-        self.chunkCounter = 0
 

@@ -34,7 +34,7 @@ def initInterface(gc):
     gc['interface'].setBackground(gc['level'].tilemap)
 
 def initLevel(gc):
-    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 100)
+    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 1000)
 
 if __name__ == "__main__":
     #Pygame
