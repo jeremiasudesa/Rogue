@@ -71,7 +71,7 @@ class Chunk:
     def __init__(self, rows:int, columns:int, top_left:Location, id, seed, start = False):
         self.id = id
         #init values
-        self.rows, self.columns, self.origin, self.adj_chunks = rows, columns, top_left, [None, None, None, None, None, None]
+        self.rows, self.columns, self.origin, self.adj_chunks, self.killed = rows, columns, top_left, [None, None, None, None, None, None], False
         #create noise
         self.noise = NoiseMap(self.rows, self.columns, 0.065, seed, top_left)
         self.noisemap = self.noise.getMap()
@@ -98,8 +98,9 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
-        self.enemy_probability = seed*0.000001
+        self.enemy_probability = seed*0.00001
         self.adj_level['u'], self.adj_level['d'] = None, None
+        self.locToEnemy = {}
         #define elements locations
         self.update_map_chunk(Chunk(rows, columns, Location([0, 0]), 0, seed, True))
         self.initLoc()

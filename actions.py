@@ -161,6 +161,10 @@ def death_ray(level, interface, player):
         #display death ray text
         interface.clearRay(ray, level.tilemap)
         #kill the corresponding enemies
+        for cell in ray:
+            if(level.loc(cell) == mapping.ENEMY):
+                enemy = level.locToEnemy[cell]
+                enemy.hp //= 2
 
 def pick_orb(level, player, orb):
     orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
@@ -228,7 +232,6 @@ def update_playpos(gc):
     paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
 
 def spawn_enemy_batch(level, player, enemy_list):
-    arb_pos = player.posarray[0]
     for i in range(level.rows):
         for j in range(level.columns):
             loc1, loc2 = level.loc((i, j)), level.loc((i+1, j+1))
@@ -310,26 +313,30 @@ def update_enemy_pos(level, interface, enemy, player):
     clear_posarray(level, enemy.posarray)
     enemy.updatePos(nxtpos)
     paint_posarray(level, enemy.posarray, mapping.ENEMY)
+    for pos in enemy.posarray:
+        level.locToEnemy[tuple(pos)] = enemy
 
-def kill_enemies(gc):
-    for enemy in gc['elems']['enemies']:
-        enemy.sprite.kill()
-    gc['elems']['enemies'] = []
-
+#Sonido Trueno Minecraft
 
 def update_enemies(gc):
     enems = gc['elems']['enemies']
-    to_delete = []
-    for enemy_ind in range(len(enems)):
-        if(enems[enemy_ind].hp == 0):
-            to_delete.append(enemy_ind)
-            continue
-        update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
-    for ind in to_delete[::-1]:
-        enems.pop(ind)
     if(len(enems) == 0):
+        if(gc['level'].curr_chunk.killed):return
         spawn_enemy_batch(gc['level'], gc['elems']['player'], enems)
         add_sprites(gc['sprite_group'], enems)
-        return
-    if(enems[0].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):
-        kill_enemies(gc)
+    else:
+        to_delete = []
+        for enemy_ind in range(len(enems)):
+            if(enems[enemy_ind].hp == 0 or enems[enemy_ind].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):
+                to_delete.append(enemy_ind)
+                continue
+            update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
+        for ind in to_delete[::-1]:
+            clear_posarray(gc['level'], enems[ind].posarray)
+            enems[ind].sprite.kill()
+            gc['level'].locToEnemy.pop(enems[ind], None)
+            enems.pop(ind)
+        #Check if you have killed everyone
+        if(len(enems) == 0):
+            gc['level'].curr_chunk.killed = True
+            return
