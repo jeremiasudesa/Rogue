@@ -41,20 +41,20 @@ class Interface:
         pygame.draw.rect(self.bg, color, pygame.Rect(0, 0, const.WIDTH, const.HEIGHT))
         self.render()
     
-    def createText(self, text, center, color = [255, 255, 255], bgcolor = [0, 0, 0]):
+    def createText(self, text, center,surface, color = [255, 255, 255], bgcolor = [0, 0, 0]):
         font = pygame.font.Font('freesansbold.ttf', 32)
         text = font.render(text, True, color, bgcolor)
         textRect = text.get_rect()
         textRect.center = center
-        self.surf.blit(text, textRect)
+        surface.blit(text, textRect)
         pygame.display.update()
         return textRect
     
     def createQuestionText(self, text):
-        self.createText(text, (const.WIDTH//2, const.HEIGHT//2))
+        self.createText(text, (const.WIDTH//2, const.HEIGHT//2), self.surf)
     
     def writeUserInput(self, userstr):
-        return self.createText(userstr, (const.WIDTH//2, const.HEIGHT//2 + 100))
+        return self.createText(userstr, (const.WIDTH//2, const.HEIGHT//2 + 100), self.surf)
     
     def clearText(self, rect):
         pygame.draw.rect(self.surf, [0, 0, 0], rect)
@@ -74,3 +74,6 @@ class Interface:
         for cell in ray:
             pygame.draw.rect(self.bg, tilemap[cell[0]][cell[1]].color, pygame.Rect(cell[1] * const.PIXEL, const.PIXEL * cell[0],const.PIXEL, const.PIXEL))
         self.render()
+    
+    def drawCounter(self, chunk):
+        self.createText(f"Chunks Visited: {chunk}", (150,50), surface = self.bg, bgcolor=None, color= [255, 0, 0])

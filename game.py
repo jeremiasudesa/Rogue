@@ -78,6 +78,7 @@ if __name__ == "__main__":
                 music.play_song("end.mp3")
             iterations = 0
             #Loopify
+            actions.update_chunk_counter(gc['interface'], gc['elems']['player'])
             actions.update_enemies(gc)
             actions.update_player(gc)
             actions.update_door(gc['level'], ge['door1'], False)

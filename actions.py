@@ -43,6 +43,9 @@ def updateBakground(interface, level):
 
 #TURN EVERY GAME COMPONENT INTO A GLOBAL VARIABLE
 
+def update_chunk_counter(interface, player):
+    interface.drawCounter(player.chunkCounter)
+
 def nxt_chunk(gc, level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
@@ -73,6 +76,7 @@ def nxt_level(gc, dir):
     update_playpos(gc)
     paint_posarray(gc['level'], gc['elems']['door1'].posarray, mapping.STAIR_DOWN)
     paint_posarray(gc['level'], gc['elems']['door2'].posarray, mapping.STAIR_UP)
+    gc['elems']['player'].chunkCounter = 0
 
 def update_item_visibility(level, item):
     """
@@ -218,7 +222,6 @@ def update_playpos(gc):
         match posloc:
             case mapping.STAIR_DOWN:
                 if(gc['elems']['player'].chunkCounter>10):nxt_level(gc, 'd')
-                else: print(gc['elems']['player'].chunkCounter)
             case mapping.STAIR_UP:
                 nxt_level(gc, 'u')
                 return
