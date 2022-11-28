@@ -47,6 +47,7 @@ def nxt_chunk(gc, level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
+    if(level.curr_chunk.adj_chunks[dir[0]] == None):gc['elems']['player'].chunkCounter += 1
     level.newChunk(dir[1], dir[0])
     level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
 
@@ -216,8 +217,8 @@ def update_playpos(gc):
         posloc = gc['level'].loc(pos)
         match posloc:
             case mapping.STAIR_DOWN:
-                nxt_level(gc, 'd')
-                return
+                if(gc['elems']['player'].chunkCounter>10):nxt_level(gc, 'd')
+                else: print(gc['elems']['player'].chunkCounter)
             case mapping.STAIR_UP:
                 nxt_level(gc, 'u')
                 return

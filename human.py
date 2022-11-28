@@ -9,5 +9,6 @@ class Human(Entity):
         #Change for inventory dictionary
         self.destructionMode, self.deathPower = False, False
         self.sprite.setPos(self.pos)
+        self.chunkCounter = 0
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
 
