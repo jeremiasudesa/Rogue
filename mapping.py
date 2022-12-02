@@ -6,6 +6,8 @@ import bisect
 import const
 
 Location = tuple[int, int]
+colors = [[66,172,175],[78, 188, 185], [119, 192, 180], [177, 201, 167], [231, 213, 147], [210, 227, 111], [200, 220, 147]]
+heights = [-1, 0.45, 0.5, 0.55, 0.62, 0.68]
 
 class Tile:
     """Tile(char: str, walkable: bool=True)
@@ -17,10 +19,8 @@ class Tile:
     char (str) -- string of length 1 that is rendered when rendering a map.
     walkable (bool) -- states if the tile is walkable or not.
     """
-    __colors = [[0, 50, 80],[0, 71, 171],[0, 94, 184], [90,90,90], [110,110,110], [169,169,169], [192,192,192], [211,211,211], [220,220,220]]
-    __heights = [-1, 0.4, 0.44, 0.5, 0.63, 0.7, 0.8, 0.83, 0.85]
     def __pickColor(self, num):
-        return self.__colors[bisect.bisect_left(self.__heights, num)-1]
+        return colors[bisect.bisect_left(heights, num)-1]
 
     def __init__(self, noise):
         self.color = self.__pickColor(noise)
@@ -76,11 +76,11 @@ class Chunk:
         self.noise = NoiseMap(self.rows, self.columns, 0.065, seed, top_left)
         self.noisemap = self.noise.getMap()
         #create tilemap
-        self.state = [[(WALL if self.noisemap[i][j] > 0.5 else AIR) for j in range(columns)] for i in range(rows)]
+        self.state = [[(WALL if self.noisemap[i][j] > 0.62 else AIR) for j in range(columns)] for i in range(rows)]
         self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
         if(start):
-            for i in range(self.rows//5, self.rows-self.rows//5):
-                for j in range(self.columns//5, self.columns-self.columns//5):
+            for i in range(self.rows//3, self.rows-self.rows//3):
+                for j in range(self.columns//3, self.columns-self.columns//3):
                     self.state[i][j] = AIR
                     self.tilemap[i][j] = Tile(-1)
 

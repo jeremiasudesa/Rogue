@@ -21,7 +21,10 @@ class Interface:
         n, m = len(map), len(map[0])
         for i in range(n):
             for j in range(m):
-                pygame.draw.rect(self.bg, map[i][j].color, pygame.Rect(j * const.PIXEL, const.PIXEL * i,const.PIXEL, const.PIXEL))
+                color = map[i][j].color
+                f = 1
+                color = (color[0]*f, color[1]*f, color[2]*f)
+                pygame.draw.rect(self.bg, color, pygame.Rect(j * const.PIXEL, const.PIXEL * i,const.PIXEL, const.PIXEL))
     
     def setSprites(self, sprite_group):
         """Set Sprites
@@ -76,4 +79,4 @@ class Interface:
         self.render()
     
     def drawCounter(self, chunk):
-        self.createText(f"Chunks Visited: {chunk}", (150,50), surface = self.bg, bgcolor=None, color= [255, 0, 0])
+        self.createText(f"XP: {chunk}", (50,50), surface = self.bg, bgcolor=None)

@@ -169,7 +169,7 @@ def death_ray(level, interface, player):
         for cell in ray:
             if(level.loc(cell) == mapping.ENEMY):
                 enemy = level.locToEnemy[cell]
-                enemy.hp //= 2
+                enemy.hp = max(enemy.hp-1, 0)
 
 def pick_orb(level, player, orb):
     orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
