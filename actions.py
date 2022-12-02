@@ -10,6 +10,7 @@ import sys
 import time
 import music
 import items
+import bisect
 
 def initLevelItems(ge, level):
     ge['door1'], ge['door2'] = items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
@@ -190,7 +191,7 @@ def destroy_walls(level, player, interface):
         if(x in player.posarray or level.whereIsPos(x)[0] != 0):continue
         if(level.loc(x) != mapping.WALL):continue
         level.state[x[0]][x[1]] = mapping.AIR
-        level.tilemap[x[0]][x[1]].color = [0, 94, 184]
+        level.tilemap[x[0]][x[1]].color = mapping.colors[bisect.bisect_left(mapping.heights, 0.62)-1]
         interface.setBackground(level.tilemap)
 
 def update_player(gc):
