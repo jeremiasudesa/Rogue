@@ -31,7 +31,7 @@ class Door(Item):
 #TODO: change name hammer?
 class Pickaxe(Item):
     def __init__(self, pos):
-        super().__init__('pickaxe', pos, 'pickaxe.png')
+        super().__init__('pickaxe', pos, 'pick.png')
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1],[pos[0]+2, pos[1]]]
         self.picked = False
         #TODO: turn every position to vector?
@@ -39,7 +39,7 @@ class Pickaxe(Item):
 
 class Orb(Item):
     def __init__(self, pos):
-        super().__init__('Orbimus Maximus', pos, 'ORB.png')
+        super().__init__('Orbimus Maximus', pos, 'orb.png')
         self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1],[pos[0]+2, pos[1]]]
         self.picked = False
         self.angle = 0
