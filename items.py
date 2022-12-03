@@ -20,9 +20,9 @@ class Door(Item):
     def __init__(self, level_a, level_b, pos):
         self.level_a, self.level_b = level_a, level_b
         if(self.level_a < self.level_b):
-            sprite_path = 'door1.png'
+            sprite_path = 'portal1.png'
         else:
-            sprite_path = 'door2.png'
+            sprite_path = 'portal2.png'
         super().__init__('DOOR', pos, sprite_path)
         self.sprite.setPos(pos)
         #TODO: posarray maker taking into consideration width and height (also, I think that the player pos is discongruent with sprite center pos)

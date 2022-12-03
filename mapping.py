@@ -79,8 +79,8 @@ class Chunk:
         self.state = [[(WALL if self.noisemap[i][j] > 0.62 else AIR) for j in range(columns)] for i in range(rows)]
         self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
         if(start):
-            for i in range(self.rows//3, self.rows-self.rows//3):
-                for j in range(self.columns//3, self.columns-self.columns//3):
+            for i in range(self.rows//4, self.rows-self.rows//4):
+                for j in range(self.columns//4, self.columns-self.columns//4):
                     self.state[i][j] = AIR
                     self.tilemap[i][j] = Tile(-1)
 
