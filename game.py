@@ -65,11 +65,11 @@ if __name__ == "__main__":
                     ge['player'].dir = tuple(const.DIRS[actions.keys.index(event.key)])
                     actions.handle_player_dir(ge['player'],event.key)
                 elif(event.key == pygame.K_p):
-                    actions.use_pickaxe(ge['player'], ge['pick'])
+                    actions.use_pickup(ge['pick'], ge['player'])
                 elif(event.key == pygame.K_SPACE):
-                    if(ge['player'].deathPower):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
+                    if(ge['player'].inventory['O']):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                 elif(event.key == pygame.K_o):
-                    actions.use_orb(gc['level'], ge['player'], ge['orb'])
+                    actions.use_pickup(ge['orb'], ge['player'])
         if(iterations == const.FRAME):
             #TODO: turn this into a music.py functionality
             #MUSIC

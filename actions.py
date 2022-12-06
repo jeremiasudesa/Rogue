@@ -114,19 +114,11 @@ def update_pickaxe_sprite(player, pickaxe):
     pickaxe.sprite.rect.center = pac + offset.rotate(pickaxe.angle)
 
 def update_pickaxe(level, pickaxe, player):
-    if(player.destructionMode):update_pickaxe_sprite(player, pickaxe)
+    if(player.inventory['P']):update_pickaxe_sprite(player, pickaxe)
     if(pickaxe.picked):return
     update_item_visibility(level, pickaxe)
     paint_posarray(level, pickaxe.posarray, mapping.PICKAXE)
 
-def use_pickaxe(player, pickaxe):
-    if(pickaxe.picked == False):return
-    player.destructionMode = True - player.destructionMode
-    if(not player.destructionMode):
-        pickaxe.sprite.setPos((-100, -100))
-        pickaxe.visible = False
-
-#VERY IMPORTANT TODO: generalize pickup functions!!!
 #ORB functions
 def update_orb_sprite(player, orb):
     orb.angle -= 7
@@ -137,7 +129,7 @@ def update_orb_sprite(player, orb):
 
 def update_orb(level, orb, player):
     #TODO: change to check if it is in player's "using item dictionary"
-    if(player.deathPower == True):update_orb_sprite(player, orb)
+    if(player.inventory['O'] == True):update_orb_sprite(player, orb)
     if(orb.picked):return
     update_item_visibility(level, orb)
     paint_posarray(level, orb.posarray, mapping.ORB)
@@ -168,17 +160,18 @@ def death_ray(level, interface, player):
                 enemy = level.locToEnemy[cell]
                 enemy.hp = max(enemy.hp-1, 0)
 
-def pick_pickUp(level, pickup, playpos):
-    px, py = playpos
+def pick_pickUp(level, pickup, player):
+    px, py = player.pos
     pickup.pick((px+2, py+2))
     clear_posarray(level, pickup.posarray)
+    player.inventory[str(pickup)] = False
 
-def use_orb(level, player, orb):
-    if(orb.picked == False):return
-    player.deathPower = True - player.deathPower
-    if(not player.deathPower):
-        orb.sprite.setPos((-100, -100))
-        orb.visible = False
+def use_pickup(pickup, player):
+    if(pickup.picked == False):return
+    player.inventory[str(pickup)] = True - player.inventory[str(pickup)]
+    if(not player.inventory[str(pickup)]):
+        pickup.sprite.setPos((-100, -100))
+        pickup.visible = False
 
 def destroy_walls(level, player, interface):
     nxt_pos = player.nxtPosarray(player.dir)
@@ -191,7 +184,7 @@ def destroy_walls(level, player, interface):
 
 def update_player(gc):
     update_playpos(gc)
-    if(gc['elems']['player'].destructionMode):destroy_walls(gc['level'], gc['elems']['player'], gc['interface'])
+    if(gc['elems']['player'].inventory['P']):destroy_walls(gc['level'], gc['elems']['player'], gc['interface'])
 
 
 def update_playpos(gc):
@@ -222,9 +215,9 @@ def update_playpos(gc):
                 nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
-                pick_pickUp(gc['level'], gc['elems']['pick'], gc['elems']['player'].pos)
+                pick_pickUp(gc['level'], gc['elems']['pick'], gc['elems']['player'])
             case mapping.ORB:
-                pick_pickUp(gc['level'], gc['elems']['orb'], gc['elems']['player'].pos)
+                pick_pickUp(gc['level'], gc['elems']['orb'], gc['elems']['player'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
     clear_posarray(gc['level'], gc['elems']['player'].posarray)

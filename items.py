@@ -42,6 +42,8 @@ class Door(Item):
         super().__init__('DOOR', pos, sprite_path)
         self.sprite.setPos(pos)
         self.posarray = self.getPosRect(5,5)
+    def __str__(self) -> str:
+        return "D"
     
 class Pickaxe(Pickup):
     def __init__(self, pos):
@@ -50,6 +52,8 @@ class Pickaxe(Pickup):
         self.picked = False
         #TODO: turn every position to vector?
         self.angle = 0
+    def __str__(self) -> str:
+        return "P"
 
 class Orb(Pickup):
     def __init__(self, pos):
@@ -57,3 +61,5 @@ class Orb(Pickup):
         self.posarray = self.getPosRect(2, 2)
         self.picked = False
         self.angle = 0
+    def __str__(self) -> str:
+        return "O"
