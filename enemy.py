@@ -8,5 +8,5 @@ class Enemy(Entity):
         self.alive, self.moving = True, moving
         self.sprite.setPos(self.pos)
         self.dir = Vector2(1 - 2*randint(0, 1), 1 - 2*randint(0, 1))
-        self.posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
+        self.posarray = self.getPosRect(2, 2)
         self.origin = origin_chunk

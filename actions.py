@@ -119,12 +119,6 @@ def update_pickaxe(level, pickaxe, player):
     update_item_visibility(level, pickaxe)
     paint_posarray(level, pickaxe.posarray, mapping.PICKAXE)
 
-def pick_pickaxe(level, player, pickaxe):
-    pickaxe.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
-    pickaxe.picked, pickaxe.visible = True, False
-    clear_posarray(level, pickaxe.posarray)
-    pickaxe.sprite.setPos((-100, -100))
-
 def use_pickaxe(player, pickaxe):
     if(pickaxe.picked == False):return
     player.destructionMode = True - player.destructionMode
@@ -151,7 +145,9 @@ def update_orb(level, orb, player):
 def get_ray(level, pos, component_id, ray, play_dir, depth):
     if(depth == 700 or level.where[pos[0]][pos[1]] != component_id):return
     ray.append(pos)
-    prob = [0.85 if play_dir == const.DIRS[i] else 0.5 for i in range(len(const.DIRS))]
+    probdir = 0.5
+    probodir = (1 - probdir)/3
+    prob = [probdir if play_dir == const.DIRS[i] else probodir for i in range(len(const.DIRS))]
     curr_dir = random.choices(const.DIRS, prob)[0]
     new_pos = (pos[0] + curr_dir[0], pos[1] + curr_dir[1])
     if(level.is_walkable(new_pos)):get_ray(level, new_pos, component_id, ray, play_dir, depth+1)
@@ -172,11 +168,10 @@ def death_ray(level, interface, player):
                 enemy = level.locToEnemy[cell]
                 enemy.hp = max(enemy.hp-1, 0)
 
-def pick_orb(level, player, orb):
-    orb.sprite.rect.center = (player.sprite.rect.center[0]+2, player.sprite.rect.center[0]+2)
-    orb.picked, orb.visible = True, False
-    clear_posarray(level, orb.posarray)
-    orb.sprite.setPos((-100, -100))
+def pick_pickUp(level, pickup, playpos):
+    px, py = playpos
+    pickup.pick((px+2, py+2))
+    clear_posarray(level, pickup.posarray)
 
 def use_orb(level, player, orb):
     if(orb.picked == False):return
@@ -227,9 +222,9 @@ def update_playpos(gc):
                 nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
-                pick_pickaxe(gc['level'], gc['elems']['player'], gc['elems']['pick'])
+                pick_pickUp(gc['level'], gc['elems']['pick'], gc['elems']['player'].pos)
             case mapping.ORB:
-                pick_orb(gc['level'], gc['elems']['player'], gc['elems']['orb'])
+                pick_pickUp(gc['level'], gc['elems']['orb'], gc['elems']['player'].pos)
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
     clear_posarray(gc['level'], gc['elems']['player'].posarray)

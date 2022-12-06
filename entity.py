@@ -8,6 +8,13 @@ class Entity:
         self.max_hp = hit_points
         self.sprite = Sprite(path, pos)
         self.sprite.setPos(pos)
+        
+    def getPosRect(self, width, height):
+        ret = []
+        for x in range(height):
+            for y in range(width):
+                ret.append((self.pos[0]+x, self.pos[1] + y))
+        return ret
 
     def __plusDir(self, pos:tuple, dir):
         return [pos[0] + dir[0], pos[1] + dir[1]]
