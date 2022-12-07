@@ -71,11 +71,8 @@ if __name__ == "__main__":
                 elif(event.key == pygame.K_o):
                     actions.use_pickup(ge['orb'], ge['player'])
         if(iterations == const.FRAME):
-            #TODO: turn this into a music.py functionality
             #MUSIC
-            num = random.randint(0, const.SONGFREQ)
-            if(num == 0 and music.music_channel.get_busy() == False):
-                music.play_song("end.mp3")
+            music.rand_music("end.wav")
             iterations = 0
             #Loopify
             actions.update_chunk_counter(gc['interface'], gc['elems']['player'])

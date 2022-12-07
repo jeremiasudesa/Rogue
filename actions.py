@@ -17,7 +17,6 @@ def initLevelItems(ge, level):
     if(level.pickaxe != None): ge['pick'] = items.Pickaxe(level.pickaxe)
     if(level.orb != None): ge['orb'] = items.Orb(level.orb)
 
-
 #TODO: distinction between regular keys and number_keys
 keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
 number_keys = [pygame.K_0,pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9]
@@ -42,16 +41,14 @@ def clear_posarray(lvl, posarray):
 def updateBakground(interface, level):
     interface.setBackground(level.tilemap)
 
-#TURN EVERY GAME COMPONENT INTO A GLOBAL VARIABLE
-
 def update_chunk_counter(interface, player):
-    interface.drawCounter(player.chunkCounter)
+    interface.drawCounter(player.XP)
 
 def nxt_chunk(gc, level, dir):
     '''
     Handle possible next chunk directions and pass it to the chunk object itself
     '''
-    if(level.curr_chunk.adj_chunks[dir[0]] == None):gc['elems']['player'].chunkCounter += 1
+    if(level.curr_chunk.adj_chunks[dir[0]] == None):gc['elems']['player'].XP += 1
     level.newChunk(dir[1], dir[0])
     level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
 
@@ -67,17 +64,18 @@ def add_sprites_from_dict(sprite_group, entity_list):
         add_sprites(sprite_group, entity)
 
 def nxt_level(gc, dir):
+    ge = gc['elems']
     if(gc['level'].adj_level[dir] == None):
         gc['level'].adj_level[dir] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
         gc['level'].adj_level[dir].adj_level['d' if (dir == 'u') else 'u'] = gc['level']
     gc['level'] = gc['level'].adj_level[dir]
     gc['interface'].setBackground(gc['level'].tilemap)
     pos = gc['level'].spawn
-    gc['elems']['player'].posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
+    ge['player'].posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
     update_playpos(gc)
-    paint_posarray(gc['level'], gc['elems']['door1'].posarray, mapping.STAIR_DOWN)
-    paint_posarray(gc['level'], gc['elems']['door2'].posarray, mapping.STAIR_UP)
-    gc['elems']['player'].chunkCounter = 0
+    paint_posarray(gc['level'], ge['door1'].posarray, mapping.STAIR_DOWN)
+    paint_posarray(gc['level'], ge['door2'].posarray, mapping.STAIR_UP)
+    ge['player'].XP = 0
 
 def update_item_visibility(level, item):
     """
@@ -105,7 +103,6 @@ def update_door(level, door, type):
         paint_posarray(level, door.posarray, (mapping.STAIR_UP if type else mapping.STAIR_DOWN))
         door.represented = True
 
-#TODO: generalize pickup functions, create pickup class
 #PICKAXE FUNCTIONS
 def update_pickaxe_sprite(player, pickaxe):
     pickaxe.angle -= 7
@@ -126,9 +123,7 @@ def update_orb_sprite(player, orb):
     offset = Vector2(50,50)
     orb.sprite.rect.center = pac + offset.rotate(orb.angle)
 
-
 def update_orb(level, orb, player):
-    #TODO: change to check if it is in player's "using item dictionary"
     if(player.inventory['O'] == True):update_orb_sprite(player, orb)
     if(orb.picked):return
     update_item_visibility(level, orb)
@@ -137,7 +132,7 @@ def update_orb(level, orb, player):
 def get_ray(level, pos, component_id, ray, play_dir, depth):
     if(depth == 700 or level.where[pos[0]][pos[1]] != component_id):return
     ray.append(pos)
-    probdir = 0.5
+    probdir = 0.45
     probodir = (1 - probdir)/3
     prob = [probdir if play_dir == const.DIRS[i] else probodir for i in range(len(const.DIRS))]
     curr_dir = random.choices(const.DIRS, prob)[0]
@@ -191,38 +186,38 @@ def update_playpos(gc):
     """Update Player Position
     Updates the player's sprite position and the player representation in tilemap
     """
+    ge = gc['elems']
     #find next position
-    nxtpos = gc['elems']['player'].nxtPosarray(gc['elems']['player'].dir)
+    nxtpos = ge['player'].nxtPosarray(ge['player'].dir)
     #check if player is trying to go outside the chunk
     dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != 0):
         nxt_chunk(gc, gc['level'], dir)
         updateBakground(gc['interface'], gc['level'])
         chunkdir = [-dir[1][1], -dir[1][0]]
-        nxtpos = gc['elems']['player'].nxtPosarray(dir[1])
-        gc['elems']['player'].updatePos(nxtpos)
-        paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
+        nxtpos = ge['player'].nxtPosarray(dir[1])
+        ge['player'].updatePos(nxtpos)
+        paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
         return
     #movement
-    #TODO: inside definition of ge
-    if(gc['elems']['player'].moving == False):return
+    if(ge['player'].moving == False):return
     for pos in nxtpos:
         posloc = gc['level'].loc(pos)
         match posloc:
             case mapping.STAIR_DOWN:
-                if(gc['elems']['player'].chunkCounter>10):nxt_level(gc, 'd')
+                if(ge['player'].XP>10):nxt_level(gc, 'd')
             case mapping.STAIR_UP:
                 nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
-                pick_pickUp(gc['level'], gc['elems']['pick'], gc['elems']['player'])
+                pick_pickUp(gc['level'], ge['pick'], ge['player'])
             case mapping.ORB:
-                pick_pickUp(gc['level'], gc['elems']['orb'], gc['elems']['player'])
+                pick_pickUp(gc['level'], ge['orb'], ge['player'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
-    clear_posarray(gc['level'], gc['elems']['player'].posarray)
-    gc['elems']['player'].updatePos(nxtpos)
-    paint_posarray(gc['level'], gc['elems']['player'].posarray, mapping.PLAYER)
+    clear_posarray(gc['level'], ge['player'].posarray)
+    ge['player'].updatePos(nxtpos)
+    paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
 
 def spawn_enemy_batch(level, player, enemy_list):
     for i in range(level.rows):
@@ -241,7 +236,7 @@ def create_question():
     a, b = random.randint(0, const.DIFFICULTY), random.randint(0, const.DIFFICULTY)
     return (f"What is {a} * {b}?", a*b)
 
-#TODO: todas las funciones deberian ser de actions
+#TODO: carpeta de actions
 
 def game_over(interface):
     music.play_song("end.mp3")
@@ -312,10 +307,11 @@ def update_enemy_pos(level, interface, enemy, player):
 #Sonido Trueno Minecraft
 
 def update_enemies(gc):
-    enems = gc['elems']['enemies']
+    ge = gc['elems']
+    enems = ge['enemies']
     while(len(enems) == 0):
         if(gc['level'].curr_chunk.killed):return
-        spawn_enemy_batch(gc['level'], gc['elems']['player'], enems)
+        spawn_enemy_batch(gc['level'], ge['player'], enems)
         add_sprites(gc['sprite_group'], enems)
     to_delete = []
     changedLevel = False
@@ -324,7 +320,7 @@ def update_enemies(gc):
             if(enems[enemy_ind].origin != (gc['level'].curr_chunk.id, gc['level'].seed)):changedLevel = True
             to_delete.append(enemy_ind)
             continue
-        update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], gc['elems']['player'])
+        update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], ge['player'])
     for ind in to_delete[::-1]:
         clear_posarray(gc['level'], enems[ind].posarray)
         enems[ind].sprite.kill()
