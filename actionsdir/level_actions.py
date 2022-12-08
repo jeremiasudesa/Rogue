@@ -15,7 +15,6 @@ def initLevel(gc):
     gc['level'] = mapping.Level(vars.ROWS, vars.COLUMNS, vars.ORIGIN_SEED)
 
 def initLevelItems(ge, level):
-    
     if(ge.get('door1') == None):
         ge['door1'], ge['door2']= items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
     ge['trophy'] = None
@@ -52,7 +51,7 @@ def clear_posarray(lvl, posarray):
 
 def can_open(level, xp):
     if(level.unlocked):return True
-    if(xp>=5):
+    if(xp>=0):
         level.unlocked = True
         return True
     return False

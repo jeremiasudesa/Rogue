@@ -7,7 +7,7 @@ import vars
 
 Location = tuple[int, int]
 colors = [[66,172,175],[78, 188, 185], [119, 192, 180], [177, 201, 167], [231, 213, 147], [210, 227, 111], [200, 220, 147]]
-heights = [-1, 0.45, 0.5, 0.55, 0.62, 0.68]
+heights = [-1, 0.45, 0.5, 0.55, 0.62, 0.7]
 
 class Tile:
     """Tile(char: str, walkable: bool=True)
@@ -33,7 +33,7 @@ for x in range(-1, 2):
             continue
         directions.append((x, y))
 
-AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE, ENEMY, ORB, TROPHY = range(9)
+AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE, ENEMY, ORB, TROPHY, UNBREAKABLE = range(10)
 
 class NoiseMap:
     """NoiseMap(rows:int, columns:int, zoom:int, seed:int)
@@ -76,7 +76,13 @@ class Chunk:
         self.noise = NoiseMap(self.rows, self.columns, 0.065, seed, top_left)
         self.noisemap = self.noise.getMap()
         #create tilemap
-        self.state = [[(WALL if self.noisemap[i][j] > 0.62 else AIR) for j in range(columns)] for i in range(rows)]
+        self.state = [[None for j in range(columns)] for i in range(rows)]
+        for i in range(rows):
+            for j in range(columns):
+                if(self.noisemap[i][j] > 0.62):
+                    if(self.noisemap[i][j] >= 0.9): self.state[i][j] = UNBREAKABLE
+                    else: self.state[i][j] = WALL
+                else: self.state[i][j] = AIR
         self.tilemap = [[Tile(self.noisemap[i][j]) for j in range(columns)] for i in range(rows)]
         if(start):
             for i in range(self.rows//4, self.rows-self.rows//4):
