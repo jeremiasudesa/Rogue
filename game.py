@@ -43,7 +43,7 @@ if __name__ == "__main__":
                         case pygame.K_SPACE:
                             if(player_actions.in_inventory(ge['player'], 'O')):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                         case _:
-                            player_actions.move(ge['player'], event.key)
+                            if(event.key in (vars.keys)):player_actions.move(ge['player'], event.key)
         if(iterations == vars.FRAME):
             iterations = 0
             actions.frame(gc, ge)

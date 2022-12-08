@@ -44,3 +44,10 @@ def paint_posarray(lvl, posarray, tile):
 def clear_posarray(lvl, posarray):
     for pos in posarray:
         lvl.state[int(pos[0])][int(pos[1])] = mapping.AIR
+
+def can_open(level, xp):
+    if(level.unlocked):return True
+    if(xp>=10):
+        level.unlocked = True
+        return True
+    return False

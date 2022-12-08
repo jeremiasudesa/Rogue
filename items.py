@@ -42,6 +42,7 @@ class Door(Item):
         super().__init__('DOOR', pos, sprite_path)
         self.sprite.setPos(pos)
         self.posarray = self.getPosRect(5,5)
+        
     def __str__(self) -> str:
         return "D"
     

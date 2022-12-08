@@ -88,7 +88,7 @@ def update_playpos(gc):
         posloc = gc['level'].loc(pos)
         match posloc:
             case mapping.STAIR_DOWN:
-                if(ge['player'].XP>10):nxt_level(gc, 'd')
+                if(level_actions.can_open(gc['level'], ge['player'].XP)):nxt_level(gc, 'd')
             case mapping.STAIR_UP:
                 nxt_level(gc, 'u')
                 return
