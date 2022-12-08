@@ -2,16 +2,8 @@ from typing import Union
 from pygame.math import Vector2
 
 import mapping
-import pygame
-import vars
-import random
 from enemy import Enemy
-import sys
-import time
-import music
-import items
-import bisect
-from actionsdir import interface_actions, level_actions, player_actions, entities_actions
+from actionsdir import level_actions
 
 def update_item_visibility(level, item):
     """

@@ -8,10 +8,8 @@ import random
 from enemy import Enemy
 import sys
 import time
-import music
-import items
 import bisect
-from actionsdir import interface_actions, level_actions, player_actions, entities_actions, items_actions
+from actionsdir import interface_actions, level_actions, player_actions, entities_actions, items_actions, music_actions
 
 
 def nxt_level(gc, dir):
@@ -112,7 +110,7 @@ def create_question():
     return (f"What is {a} * {b}?", a*b)
 
 def game_over(interface):
-    music.play_song("end.mp3")
+    music_actions.play_song("end.mp3")
     interface.gameOver()
     time.sleep(8)
     pygame.display.quit()

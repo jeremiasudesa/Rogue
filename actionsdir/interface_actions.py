@@ -1,16 +1,7 @@
 from typing import Union
 from pygame.math import Vector2
 
-import mapping
 import pygame
-import vars
-import random
-from enemy import Enemy
-import sys
-import time
-import music
-import items
-import bisect
 from interface import Interface
 from actionsdir import entities_actions
 
@@ -27,5 +18,5 @@ def initInterface(gc):
 def updateBakground(interface, level):
     interface.setBackground(level.tilemap)
 
-def update_chunk_counter(interface, player):
+def update_xp(interface, player):
     interface.drawCounter(player.XP)

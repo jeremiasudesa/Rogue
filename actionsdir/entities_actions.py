@@ -8,7 +8,6 @@ import random
 from enemy import Enemy
 import sys
 import time
-import music
 import items
 import bisect
 from human import Human
