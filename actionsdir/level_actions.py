@@ -51,7 +51,7 @@ def clear_posarray(lvl, posarray):
 
 def can_open(level, xp):
     if(level.unlocked):return True
-    if(xp>=0):
+    if(xp>=5):
         level.unlocked = True
         return True
     return False

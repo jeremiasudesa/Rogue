@@ -98,7 +98,7 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
-        self.enemy_probability = 0.00008
+        self.enemy_probability = 0.0005
         self.adj_level['u'], self.adj_level['d'] = None, None
         self.locToEnemy = {}
         self.unlocked = False
@@ -112,8 +112,8 @@ class Level:
         self.upStair = [center[0]+10, center[1]-10]
         self.downStair = [center[0]-10, center[1]+10]
         self.orb, self.pickaxe, self.trophy = None, None, None
-        if(vars.ORIGIN_SEED == self.seed):self.pickaxe = [center[0]+5, center[1]]
-        if(vars.ORIGIN_SEED == self.seed):self.orb = [center[0]-5, center[1]]
+        if(vars.ORIGIN_SEED == self.seed):self.pickaxe = [center[0]+10, center[1]]
+        if(vars.ORIGIN_SEED == self.seed):self.orb = [center[0]-10, center[1]]
         if(vars.ORIGIN_SEED + 3 == self.seed):self.trophy = [self.rows//2+5, self.columns//2]
 
     def update_map_chunk(self, chunk):
@@ -213,7 +213,6 @@ class Level:
                     self.components.append([])
                     self.get_path((i, j), (-1,-1), self.components[comp], self.state[i][j])
                     for x in self.components[comp]:
-                        # print((x[0], x[1]), end="")
                         self.where[x[0]][x[1]] = comp
                         visited[x[0]][x[1]] = True
         self.divided = True

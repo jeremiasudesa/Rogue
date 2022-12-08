@@ -60,7 +60,6 @@ def update_orb(level, orb, player):
 #TROPHY ACTIONS
 def update_trophy(level, trophy, player):
     if(trophy.picked):return
-    print(trophy.sprite)
     update_item_visibility(level, trophy)
     level_actions.paint_posarray(level, trophy.posarray, mapping.TROPHY)
 

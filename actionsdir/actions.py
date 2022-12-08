@@ -27,12 +27,6 @@ def frame(gc, ge):
 def nxt_level(gc, dir):
     ge = gc['elems']
     pick, orb, trophy = ge['pick'], ge['orb'], ge['trophy']
-    # if(pick!=None):
-    #     if(pick.picked == False):pick.sprite.kill()
-    # if(orb!=None):
-    #     if(orb.picked == False):orb.sprite.kill()
-    # if(trophy!=None):
-    #     if(trophy.picked == False):trophy.sprite.kill()
     if(gc['level'].adj_level[dir] == None):
         gc['level'].adj_level[dir] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
         gc['level'].adj_level[dir].adj_level['d' if (dir == 'u') else 'u'] = gc['level']
@@ -113,6 +107,8 @@ def update_playpos(gc):
                 items_actions.pick_pickUp(gc['level'], ge['pick'], ge['player'])
             case mapping.ORB:
                 items_actions.pick_pickUp(gc['level'], ge['orb'], ge['player'])
+            case mapping.TROPHY:
+                items_actions.pick_pickUp(gc['level'], ge['trophy'], ge['player'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
     level_actions.clear_posarray(gc['level'], ge['player'].posarray)
@@ -170,6 +166,7 @@ def combat(level, interface, player, enemy):
                         game_over(interface)
                     done = True
     player.moving = 0
+    player.XP += 1
     interface.setBackground(level.tilemap)
 
 def update_enemy_pos(level, interface, enemy, player):
