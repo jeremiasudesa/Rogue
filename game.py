@@ -2,14 +2,12 @@
 import mapping
 import sys
 
-import random
 from human import Human
-from items import Door, Pickaxe
-import actions
+from actionsdir import actions, level_actions, interface_actions, player_actions, entities_actions, items_actions
 import pygame
 from interface import Interface
 import music
-import const
+import vars
 
 iterations = 0
 
@@ -18,70 +16,51 @@ def initPygame():
     pygame.mouse.set_visible(False)
     pygame.display.set_caption('Duck Rogue')
 
-def initEntities(ge):
-    ge['player'] = Human("Lancelot", gc['level'].spawn)
-    actions.initLevelItems(ge, gc['level'])
-    ge['enemies'] = []
-
-def initInterface(gc):
-    #Interface
-    gc['interface'] = Interface()
-    #create sprite group
-    gc['sprite_group'] = pygame.sprite.RenderPlain()
-    actions.add_sprites_from_dict(gc['sprite_group'], (gc['elems']))
-    #visual interface
-    gc['interface'].setSprites(gc['sprite_group'])
-    gc['interface'].setBackground(gc['level'].tilemap)
-
-def initLevel(gc):
-    gc['level'] = mapping.Level(const.ROWS, const.COLUMNS, 1000)
-
 if __name__ == "__main__":
     #Pygame
     initPygame()
     #Store the game components
     gc = {}
     #Level
-    initLevel(gc)
+    level_actions.initLevel(gc)
     #Entities
     gc['elems'] = {}
     ge = gc['elems']
-    initEntities(ge)
+    entities_actions.initEntities(gc, ge)
     actions.spawn_enemy_batch(gc['level'], ge['player'], ge['enemies'])
     #Interface
-    initInterface(gc)
+    interface_actions.initInterface(gc)
     while True:
-        #TODO: EVENT SWITCH
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.display.quit()
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYUP and (event.key in (actions.keys)):            # check for key releases
+            if event.type == pygame.KEYUP and (event.key in (vars.keys)):            # check for key releases
                 ge['player'].moving -=  1
             if event.type == pygame.KEYDOWN:          # check for key prXesses 
-                if(event.key in (actions.keys)):
+                if(event.key in (vars.keys)):
                     ge['player'].moving += 1 
-                    ge['player'].dir = tuple(const.DIRS[actions.keys.index(event.key)])
-                    actions.handle_player_dir(ge['player'],event.key)
+                    ge['player'].dir = tuple(vars.DIRS[vars.keys.index(event.key)])
+                    player_actions.handle_player_dir(ge['player'],event.key)
                 elif(event.key == pygame.K_p):
-                    actions.use_pickup(ge['pick'], ge['player'])
+                    items_actions.use_pickup(ge['pick'], ge['player'])
                 elif(event.key == pygame.K_SPACE):
                     if(ge['player'].inventory['O']):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                 elif(event.key == pygame.K_o):
-                    actions.use_pickup(ge['orb'], ge['player'])
-        if(iterations == const.FRAME):
+                    items_actions.use_pickup(ge['orb'], ge['player'])
+        if(iterations == vars.FRAME):
             #MUSIC
             music.rand_music("end.wav")
             iterations = 0
             #Loopify
-            actions.update_chunk_counter(gc['interface'], gc['elems']['player'])
+            interface_actions.update_chunk_counter(gc['interface'], gc['elems']['player'])
             actions.update_enemies(gc)
             actions.update_player(gc)
-            actions.update_door(gc['level'], ge['door1'], False)
-            actions.update_door(gc['level'], ge['door2'], True)
-            actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
-            actions.update_orb(gc['level'], ge['orb'], ge['player'])
+            items_actions.update_door(gc['level'], ge['door1'], False)
+            items_actions.update_door(gc['level'], ge['door2'], True)
+            items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
+            items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
             gc['interface'].render()
         else:
             iterations += 1

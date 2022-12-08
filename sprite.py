@@ -1,6 +1,6 @@
 import pygame
 import os
-import const
+import vars
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, path, pos):
@@ -17,4 +17,4 @@ class Sprite(pygame.sprite.Sprite):
         self.angle += angle
 
     def setPos(self, pos):
-        self.rect.center = ((pos[1]+1) * const.PIXEL, (pos[0]+1) * const.PIXEL)
+        self.rect.center = ((pos[1]+1) * vars.PIXEL, (pos[0]+1) * vars.PIXEL)

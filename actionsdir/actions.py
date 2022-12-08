@@ -3,7 +3,7 @@ from pygame.math import Vector2
 
 import mapping
 import pygame
-import const
+import vars
 import random
 from enemy import Enemy
 import sys
@@ -11,57 +11,8 @@ import time
 import music
 import items
 import bisect
+from actionsdir import interface_actions, level_actions, player_actions, entities_actions, items_actions
 
-def initLevelItems(ge, level):
-    ge['door1'], ge['door2'] = items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
-    if(level.pickaxe != None): ge['pick'] = items.Pickaxe(level.pickaxe)
-    if(level.orb != None): ge['orb'] = items.Orb(level.orb)
-
-#TODO: distinction between regular keys and number_keys
-keys = [pygame.K_w, pygame.K_a, pygame.K_d, pygame.K_s]
-number_keys = [pygame.K_0,pygame.K_1,pygame.K_2,pygame.K_3,pygame.K_4,pygame.K_5,pygame.K_6,pygame.K_7,pygame.K_8,pygame.K_9]
-dirdict = {}
-for i in range(len(keys)):
-    dirdict[keys[i]] = (const.DIRS[i], const.ANGLES[i])
-
-def handle_player_dir(player, key):
-    player.changeDir([dirdict[key][0][0], dirdict[key][0][1]], dirdict[key][1])
-
-def set_pvector(player, direction, angle):
-    player.changeDir(direction, angle)
-
-def paint_posarray(lvl, posarray, tile):
-    for pos in posarray:
-        lvl.state[int(pos[0])][int(pos[1])] = tile
-
-def clear_posarray(lvl, posarray):
-    for pos in posarray:
-        lvl.state[int(pos[0])][int(pos[1])] = mapping.AIR
-
-def updateBakground(interface, level):
-    interface.setBackground(level.tilemap)
-
-def update_chunk_counter(interface, player):
-    interface.drawCounter(player.XP)
-
-def nxt_chunk(gc, level, dir):
-    '''
-    Handle possible next chunk directions and pass it to the chunk object itself
-    '''
-    if(level.curr_chunk.adj_chunks[dir[0]] == None):gc['elems']['player'].XP += 1
-    level.newChunk(dir[1], dir[0])
-    level.update_map_chunk(level.curr_chunk.adj_chunks[dir[0]])
-
-def add_sprites(sprite_group, entity):
-    if(type(entity) == list):
-        for x in entity:
-            sprite_group.add(x.sprite)
-    else:
-        sprite_group.add(entity.sprite)
-
-def add_sprites_from_dict(sprite_group, entity_list):
-    for entity in entity_list.values():
-        add_sprites(sprite_group, entity)
 
 def nxt_level(gc, dir):
     ge = gc['elems']
@@ -73,78 +24,16 @@ def nxt_level(gc, dir):
     pos = gc['level'].spawn
     ge['player'].posarray = [pos,[pos[0], pos[1]+1], [pos[0]+1, pos[1]], [pos[0]+1, pos[1]+1]]
     update_playpos(gc)
-    paint_posarray(gc['level'], ge['door1'].posarray, mapping.STAIR_DOWN)
-    paint_posarray(gc['level'], ge['door2'].posarray, mapping.STAIR_UP)
+    level_actions.paint_posarray(gc['level'], ge['door1'].posarray, mapping.STAIR_DOWN)
+    level_actions.paint_posarray(gc['level'], ge['door2'].posarray, mapping.STAIR_UP)
     ge['player'].XP = 0
-
-def update_item_visibility(level, item):
-    """
-    Update an item's visibility: items should only be visible at their origin chunk
-    """
-    if(level.curr_chunk.id == item.origin):
-        if(not item.visible):
-            item.sprite.setPos(item.pos)
-            item.visible = True
-    else:
-        if(item.visible):
-            item.sprite.setPos((-100, -100))
-            item.visible = False
-
-def update_door(level, door, type):
-    """
-    Updates map state representation
-    """
-    update_item_visibility(level, door)
-    if(door.sprite.rect.center[0] < 0 and door.represented == True):
-        clear_posarray(level, door.posarray)
-        door.represented = False
-
-    elif(door.sprite.rect.center[0] >= 0 and door.represented == False):
-        paint_posarray(level, door.posarray, (mapping.STAIR_UP if type else mapping.STAIR_DOWN))
-        door.represented = True
-
-#PICKAXE FUNCTIONS
-def update_pickaxe_sprite(player, pickaxe):
-    pickaxe.angle -= 7
-    pic, pac = pickaxe.sprite.rect.center, player.sprite.rect.center
-    offset = Vector2(30,30)
-    pickaxe.sprite.rect.center = pac + offset.rotate(pickaxe.angle)
-
-def update_pickaxe(level, pickaxe, player):
-    if(player.inventory['P']):update_pickaxe_sprite(player, pickaxe)
-    if(pickaxe.picked):return
-    update_item_visibility(level, pickaxe)
-    paint_posarray(level, pickaxe.posarray, mapping.PICKAXE)
-
-#ORB functions
-def update_orb_sprite(player, orb):
-    orb.angle -= 7
-    pic, pac = orb.sprite.rect.center, player.sprite.rect.center
-    offset = Vector2(50,50)
-    orb.sprite.rect.center = pac + offset.rotate(orb.angle)
-
-def update_orb(level, orb, player):
-    if(player.inventory['O'] == True):update_orb_sprite(player, orb)
-    if(orb.picked):return
-    update_item_visibility(level, orb)
-    paint_posarray(level, orb.posarray, mapping.ORB)
-
-def get_ray(level, pos, component_id, ray, play_dir, depth):
-    if(depth == 700 or level.where[pos[0]][pos[1]] != component_id):return
-    ray.append(pos)
-    probdir = 0.45
-    probodir = (1 - probdir)/3
-    prob = [probdir if play_dir == const.DIRS[i] else probodir for i in range(len(const.DIRS))]
-    curr_dir = random.choices(const.DIRS, prob)[0]
-    new_pos = (pos[0] + curr_dir[0], pos[1] + curr_dir[1])
-    if(level.is_walkable(new_pos)):get_ray(level, new_pos, component_id, ray, play_dir, depth+1)
 
 def death_ray(level, interface, player):
     #fetch a set of coordinates
     arbpos = player.posarray[0]
     for i in range(50):
         ray = []
-        get_ray(level, arbpos, level.where[arbpos[0]][arbpos[1]], ray, tuple(player.dir), 0)
+        level_actions.get_ray(level, arbpos, level.where[arbpos[0]][arbpos[1]], ray, tuple(player.dir), 0)
         #show it in the inferface
         interface.showRay(ray)
         #display death ray text
@@ -154,19 +43,6 @@ def death_ray(level, interface, player):
             if(level.loc(cell) == mapping.ENEMY):
                 enemy = level.locToEnemy[cell]
                 enemy.hp = max(enemy.hp-1, 0)
-
-def pick_pickUp(level, pickup, player):
-    px, py = player.pos
-    pickup.pick((px+2, py+2))
-    clear_posarray(level, pickup.posarray)
-    player.inventory[str(pickup)] = False
-
-def use_pickup(pickup, player):
-    if(pickup.picked == False):return
-    player.inventory[str(pickup)] = True - player.inventory[str(pickup)]
-    if(not player.inventory[str(pickup)]):
-        pickup.sprite.setPos((-100, -100))
-        pickup.visible = False
 
 def destroy_walls(level, player, interface):
     nxt_pos = player.nxtPosarray(player.dir)
@@ -181,7 +57,6 @@ def update_player(gc):
     update_playpos(gc)
     if(gc['elems']['player'].inventory['P']):destroy_walls(gc['level'], gc['elems']['player'], gc['interface'])
 
-
 def update_playpos(gc):
     """Update Player Position
     Updates the player's sprite position and the player representation in tilemap
@@ -192,12 +67,12 @@ def update_playpos(gc):
     #check if player is trying to go outside the chunk
     dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != 0):
-        nxt_chunk(gc, gc['level'], dir)
-        updateBakground(gc['interface'], gc['level'])
+        level_actions.nxt_chunk(gc, gc['level'], dir)
+        interface_actions.updateBakground(gc['interface'], gc['level'])
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = ge['player'].nxtPosarray(dir[1])
         ge['player'].updatePos(nxtpos)
-        paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
+        level_actions.paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
         return
     #movement
     if(ge['player'].moving == False):return
@@ -210,14 +85,14 @@ def update_playpos(gc):
                 nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
-                pick_pickUp(gc['level'], ge['pick'], ge['player'])
+                items_actions.pick_pickUp(gc['level'], ge['pick'], ge['player'])
             case mapping.ORB:
-                pick_pickUp(gc['level'], ge['orb'], ge['player'])
+                items_actions.pick_pickUp(gc['level'], ge['orb'], ge['player'])
             case _:
                 if(gc['level'].is_walkable(pos) == False):return
-    clear_posarray(gc['level'], ge['player'].posarray)
+    level_actions.clear_posarray(gc['level'], ge['player'].posarray)
     ge['player'].updatePos(nxtpos)
-    paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
+    level_actions.paint_posarray(gc['level'], ge['player'].posarray, mapping.PLAYER)
 
 def spawn_enemy_batch(level, player, enemy_list):
     for i in range(level.rows):
@@ -227,16 +102,14 @@ def spawn_enemy_batch(level, player, enemy_list):
             chance = random.choices([1, 0], [level.enemy_probability, 1-level.enemy_probability])
             if(chance[0] == 1):
                 #change const file to variables file
-                const.enemies += 1
-                newEnemy = Enemy(f'Global Warming, {const.enemies}', (i, j), (level.curr_chunk.id, level.seed))
+                vars.enemies += 1
+                newEnemy = Enemy(f'Global Warming, {vars.enemies}', (i, j), (level.curr_chunk.id, level.seed))
                 enemy_list.append(newEnemy)
-                paint_posarray(level, newEnemy.posarray, mapping.ENEMY)
+                level_actions.paint_posarray(level, newEnemy.posarray, mapping.ENEMY)
 
 def create_question():
-    a, b = random.randint(0, const.DIFFICULTY), random.randint(0, const.DIFFICULTY)
+    a, b = random.randint(0, vars.DIFFICULTY), random.randint(0, vars.DIFFICULTY)
     return (f"What is {a} * {b}?", a*b)
-
-#TODO: carpeta de actions
 
 def game_over(interface):
     music.play_song("end.mp3")
@@ -245,8 +118,6 @@ def game_over(interface):
     pygame.display.quit()
     pygame.quit()
     sys.exit()
-
-#TODO (importante): hacer una funcion que se llame "get keys" para no repetir codigo o algo por el estilo
 
 def combat(level, interface, player, enemy):
     interface.fillScreen([0, 0, 0])
@@ -261,8 +132,8 @@ def combat(level, interface, player, enemy):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:          # check for key presses 
-                if(event.key in number_keys):
-                    curr += str(number_keys.index(event.key))
+                if(event.key in vars.number_keys):
+                    curr += str(vars.number_keys.index(event.key))
                     currect = interface.writeUserInput(curr)
                 elif(event.key == pygame.K_BACKSPACE):
                     if(len(curr) == 0):continue
@@ -290,7 +161,7 @@ def update_enemy_pos(level, interface, enemy, player):
         posloc = level.loc(pos)
         if(posloc == mapping.PLAYER):
             combat(level, interface, player, enemy)
-            clear_posarray(level, enemy.posarray)
+            level_actions.clear_posarray(level, enemy.posarray)
             enemy.sprite.kill()
             enemy.hp = 0
             return
@@ -298,9 +169,9 @@ def update_enemy_pos(level, interface, enemy, player):
             enemy.dir = Vector2(1 - 2*random.randint(0, 1), 1 - 2*random.randint(0, 1))
             return
     if(enemy.moving == False):return
-    clear_posarray(level, enemy.posarray)
+    level_actions.clear_posarray(level, enemy.posarray)
     enemy.updatePos(nxtpos)
-    paint_posarray(level, enemy.posarray, mapping.ENEMY)
+    level_actions.paint_posarray(level, enemy.posarray, mapping.ENEMY)
     for pos in enemy.posarray:
         level.locToEnemy[tuple(pos)] = enemy
 
@@ -312,7 +183,7 @@ def update_enemies(gc):
     while(len(enems) == 0):
         if(gc['level'].curr_chunk.killed):return
         spawn_enemy_batch(gc['level'], ge['player'], enems)
-        add_sprites(gc['sprite_group'], enems)
+        entities_actions.add_sprites(gc['sprite_group'], enems)
     to_delete = []
     changedLevel = False
     for enemy_ind in range(len(enems)):
@@ -322,7 +193,7 @@ def update_enemies(gc):
             continue
         update_enemy_pos(gc['level'], gc['interface'], enems[enemy_ind], ge['player'])
     for ind in to_delete[::-1]:
-        clear_posarray(gc['level'], enems[ind].posarray)
+        level_actions.clear_posarray(gc['level'], enems[ind].posarray)
         enems[ind].sprite.kill()
         gc['level'].locToEnemy.pop(enems[ind], None)
         enems.pop(ind)

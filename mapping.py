@@ -3,7 +3,7 @@ from typing import Optional
 import items
 import opensimplex
 import bisect
-import const
+import vars
 
 Location = tuple[int, int]
 colors = [[66,172,175],[78, 188, 185], [119, 192, 180], [177, 201, 167], [231, 213, 147], [210, 227, 111], [200, 220, 147]]
@@ -98,7 +98,7 @@ class Level:
     def __init__(self, rows: int, columns: int, seed):
         """Initializes a dungeon level class. See class documentation."""
         self.rows, self.columns, self.seed, self.adj_level = rows, columns, seed, {}
-        self.enemy_probability = 0.001
+        self.enemy_probability = 0.00005
         self.adj_level['u'], self.adj_level['d'] = None, None
         self.locToEnemy = {}
         #define elements locations
@@ -121,8 +121,8 @@ class Level:
         if(self.curr_chunk.adj_chunks[side] != None):return
         opposite = (side - 1 if (side % 2 == 0) else side + 1)
         new_tl = Location([self.curr_chunk.origin[0] + dir[0], self.curr_chunk.origin[1] + dir[1]])
-        const.chunks+=1
-        new_c = Chunk(self.rows, self.columns, new_tl, const.chunks, self.seed)
+        vars.chunks+=1
+        new_c = Chunk(self.rows, self.columns, new_tl, vars.chunks, self.seed)
         new_c.adj_chunks[opposite] = self.curr_chunk
         self.curr_chunk.adj_chunks[side] = new_c
 
@@ -173,8 +173,8 @@ class Level:
     def adjacent_coordinates(self, pos, allowed):
         '''recieves a matrix, a set of coordinates to evaluate its adjacents, the possible moves and the air and gives the adjacent movable coordinates'''
         list_adjacent_coordinates = []
-        for i in range(len(const.DIRS)):
-            new_coordinate = (pos[0]+const.DIRS[i][0], pos[1]+const.DIRS[i][1])
+        for i in range(len(vars.DIRS)):
+            new_coordinate = (pos[0]+vars.DIRS[i][0], pos[1]+vars.DIRS[i][1])
             if self.is_inmatrix(new_coordinate):
                 if self.is_walkable(new_coordinate, allowed):
                     list_adjacent_coordinates.append((new_coordinate, i))

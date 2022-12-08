@@ -1,6 +1,6 @@
 from pygame import mixer
 import os
-import const
+import vars
 import random
 
 #Instantiate mixer
@@ -18,6 +18,6 @@ def play_song(path):
     mixer.Channel(0).play(song, 0, songlen, 2000)
 
 def rand_music(path):
-    num = random.randint(0, const.SONGFREQ)
+    num = random.randint(0, vars.SONGFREQ)
     if(num == 0 and music_channel.get_busy() == False):
         play_song(path)
