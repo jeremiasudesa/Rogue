@@ -4,12 +4,12 @@ from sprite import Sprite
 numeric = Union[float, int]
 
 class Item:
-    def __init__(self, type, pos, path, origin_chunk = 0):
+    def __init__(self, type, pos, path, ORIGIN_SEED = 0):
         self.type = type
         self.sprite = Sprite(path, pos)
         self.sprite.setPos(pos)
         self.posarray = []
-        self.origin = origin_chunk
+        self.origin = ORIGIN_SEED
         self.represented = False
         self.visible = False
         self.pos = pos
@@ -23,8 +23,8 @@ class Item:
         return ret
 
 class Pickup(Item):
-    def __init__(self, type, pos, path, origin_chunk = 0):
-        super().__init__(type, pos, path, origin_chunk)
+    def __init__(self, type, pos, path, ORIGIN_SEED = 0):
+        super().__init__(type, pos, path, ORIGIN_SEED)
 
     def pick(self, playpos):
         self.sprite.rect.center = (playpos)
@@ -62,5 +62,15 @@ class Orb(Pickup):
         self.posarray = self.getPosRect(2, 2)
         self.picked = False
         self.angle = 0
+
     def __str__(self) -> str:
         return "O"
+
+class Trophy(Pickup):
+    def __init__(self, pos):
+        super().__init__('Trofeo', pos, 'trophy.png')
+        self.posarray = self.getPosRect(2, 2)
+        self.picked = False
+
+    def __str__(self) -> str:
+        return "T"

@@ -33,7 +33,7 @@ for x in range(-1, 2):
             continue
         directions.append((x, y))
 
-AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE, ENEMY, ORB = range(8)
+AIR, WALL, STAIR_UP, STAIR_DOWN, PLAYER, PICKAXE, ENEMY, ORB, TROPHY = range(9)
 
 class NoiseMap:
     """NoiseMap(rows:int, columns:int, zoom:int, seed:int)
@@ -111,8 +111,10 @@ class Level:
         self.spawn = center
         self.upStair = [center[0]+10, center[1]-10]
         self.downStair = [center[0]-10, center[1]+10]
-        self.pickaxe = [center[0]+5, center[1]]
-        self.orb = [center[0]-5, center[1]]
+        self.orb, self.pickaxe, self.trophy = None, None, None
+        if(vars.ORIGIN_SEED == self.seed):self.pickaxe = [center[0]+5, center[1]]
+        if(vars.ORIGIN_SEED == self.seed):self.orb = [center[0]-5, center[1]]
+        if(vars.ORIGIN_SEED + 3 == self.seed):self.trophy = [self.rows//2+5, self.columns//2]
 
     def update_map_chunk(self, chunk):
         self.curr_chunk, self.state, self.tilemap, self.divided = chunk, chunk.state, chunk.tilemap, False

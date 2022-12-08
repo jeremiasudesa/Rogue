@@ -9,4 +9,3 @@ class Human(Entity):
         self.posarray = self.getPosRect(2, 2)
         self.inventory = {}
         self.inventory['P'], self.inventory['O'], self.inventory['T'] = None, None, None
-

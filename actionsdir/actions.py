@@ -9,6 +9,7 @@ from enemy import Enemy
 import sys
 import time
 import bisect
+import interface
 from actionsdir import interface_actions, level_actions, player_actions, entities_actions, items_actions, music_actions
 
 def frame(gc, ge):
@@ -18,12 +19,20 @@ def frame(gc, ge):
     update_player(gc)
     items_actions.update_door(gc['level'], ge['door1'], False)
     items_actions.update_door(gc['level'], ge['door2'], True)
-    items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
-    items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
+    if(ge['pick'] != None):items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
+    if(ge['orb'] != None):items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
+    if(ge['trophy'] != None):items_actions.update_trophy(gc['level'], ge['trophy'], ge['player'])
     interface_actions.render_interface(gc['interface'])
 
 def nxt_level(gc, dir):
     ge = gc['elems']
+    pick, orb, trophy = ge['pick'], ge['orb'], ge['trophy']
+    # if(pick!=None):
+    #     if(pick.picked == False):pick.sprite.kill()
+    # if(orb!=None):
+    #     if(orb.picked == False):orb.sprite.kill()
+    # if(trophy!=None):
+    #     if(trophy.picked == False):trophy.sprite.kill()
     if(gc['level'].adj_level[dir] == None):
         gc['level'].adj_level[dir] = mapping.Level(gc['level'].rows, gc['level'].columns, gc['level'].seed+1)
         gc['level'].adj_level[dir].adj_level['d' if (dir == 'u') else 'u'] = gc['level']
@@ -35,6 +44,10 @@ def nxt_level(gc, dir):
     level_actions.paint_posarray(gc['level'], ge['door1'].posarray, mapping.STAIR_DOWN)
     level_actions.paint_posarray(gc['level'], ge['door2'].posarray, mapping.STAIR_UP)
     ge['player'].XP = 0
+    level_actions.initLevelItems(ge, gc['level'])
+    entities_actions.add_sprites_from_dict(gc['sprite_group'], (gc['elems']))
+    #visual interface
+    gc['interface'].setSprites(gc['sprite_group'])
 
 def death_ray(level, interface, player):
     #fetch a set of coordinates
@@ -92,7 +105,7 @@ def update_playpos(gc):
                     nxt_level(gc, 'd')
                     return
             case mapping.STAIR_UP:
-                if(gc['level'].seed == vars.ORIGIN_CHUNK):
+                if(gc['level'].seed == vars.ORIGIN_SEED):
                     quit_or_win(ge['player'], gc['interface'])
                 nxt_level(gc, 'u')
                 return
@@ -214,7 +227,7 @@ def update_enemies(gc):
         gc['level'].curr_chunk.killed = True
         return
 
-def win_screen(interface):
+def win_screen(interface: interface.Interface):
     music_actions.play_song("end.mp3")
     interface.Won()
     time.sleep(8.5)
@@ -224,6 +237,6 @@ def win_screen(interface):
 
 def quit_or_win(player, interface):
     if player_actions.in_inventory(player, 'T'):
-        win_screen()
+        win_screen(interface)
     else:
         game_over(interface)

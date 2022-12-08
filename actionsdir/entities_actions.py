@@ -21,9 +21,10 @@ def initEntities(gc, ge):
 def add_sprites(sprite_group, entity):
     if(type(entity) == list):
         for x in entity:
-            sprite_group.add(x.sprite)
+            if(x!=None):
+                sprite_group.add(x.sprite)
     else:
-        sprite_group.add(entity.sprite)
+        if(entity!=None):sprite_group.add(entity.sprite)
 
 def add_sprites_from_dict(sprite_group, entity_list):
     for entity in entity_list.values():

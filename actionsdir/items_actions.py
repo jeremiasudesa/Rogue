@@ -57,6 +57,14 @@ def update_orb(level, orb, player):
     update_item_visibility(level, orb)
     level_actions.paint_posarray(level, orb.posarray, mapping.ORB)
 
+#TROPHY ACTIONS
+def update_trophy(level, trophy, player):
+    if(trophy.picked):return
+    print(trophy.sprite)
+    update_item_visibility(level, trophy)
+    level_actions.paint_posarray(level, trophy.posarray, mapping.TROPHY)
+
+#GENERAL PICKUP FUNCTIONS
 def pick_pickUp(level, pickup, player):
     px, py = player.pos
     pickup.pick((px+2, py+2))
@@ -69,3 +77,4 @@ def use_pickup(pickup, player):
     if(not player.inventory[str(pickup)]):
         pickup.sprite.setPos((-100, -100))
         pickup.visible = False
+

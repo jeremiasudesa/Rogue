@@ -12,12 +12,16 @@ import items
 import bisect
 
 def initLevel(gc):
-    gc['level'] = mapping.Level(vars.ROWS, vars.COLUMNS, vars.ORIGIN_CHUNK)
+    gc['level'] = mapping.Level(vars.ROWS, vars.COLUMNS, vars.ORIGIN_SEED)
 
 def initLevelItems(ge, level):
-    ge['door1'], ge['door2'] = items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
+    
+    ge['door1'], ge['door2']= items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
+    ge['trophy'] = None
     if(level.pickaxe != None): ge['pick'] = items.Pickaxe(level.pickaxe)
     if(level.orb != None): ge['orb'] = items.Orb(level.orb)
+    if(level.trophy != None): 
+        ge['trophy'] = items.Trophy(level.trophy)
 
 def nxt_chunk(gc, level, dir):
     '''
@@ -47,7 +51,7 @@ def clear_posarray(lvl, posarray):
 
 def can_open(level, xp):
     if(level.unlocked):return True
-    if(xp>=10):
+    if(xp>=0):
         level.unlocked = True
         return True
     return False
