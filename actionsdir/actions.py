@@ -214,8 +214,13 @@ def update_enemies(gc):
         gc['level'].curr_chunk.killed = True
         return
 
-def win_screen():
-    print("You Have Won!")
+def win_screen(interface):
+    music_actions.play_song("end.mp3")
+    interface.Won()
+    time.sleep(8.5)
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()
 
 def quit_or_win(player, interface):
     if player_actions.in_inventory(player, 'T'):

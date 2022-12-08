@@ -67,6 +67,10 @@ class Interface:
         self.fillScreen([255, 0, 0])
         self.createText("GAME OVER", (vars.WIDTH//2, vars.HEIGHT//2), self.surf,  bgcolor = [255, 0, 0])
 
+    def Won(self):
+        self.fillScreen([0, 255, 0])
+        self.createText("Congratulations! You Have Won The Game", (vars.WIDTH//2, vars.HEIGHT//2), self.surf,  bgcolor = [0, 255, 0])
+
     def showRay(self, ray):
         for cell in ray:
             wob = random.randint(0, 1)
