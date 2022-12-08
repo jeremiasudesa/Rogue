@@ -11,6 +11,16 @@ import time
 import bisect
 from actionsdir import interface_actions, level_actions, player_actions, entities_actions, items_actions, music_actions
 
+def frame(gc, ge):
+    music_actions.rand_music("end.wav")
+    interface_actions.update_xp(gc['interface'], gc['elems']['player'])
+    update_enemies(gc)
+    update_player(gc)
+    items_actions.update_door(gc['level'], ge['door1'], False)
+    items_actions.update_door(gc['level'], ge['door2'], True)
+    items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
+    items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
+    interface_actions.render_interface(gc['interface'])
 
 def nxt_level(gc, dir):
     ge = gc['elems']

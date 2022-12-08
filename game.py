@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
-import mapping
 import sys
-
-from human import Human
 from actionsdir import actions, level_actions, interface_actions, player_actions, entities_actions, items_actions, music_actions
 import pygame
-from interface import Interface
 import vars
 
 iterations = 0
@@ -49,18 +45,8 @@ if __name__ == "__main__":
                         case _:
                             player_actions.move(ge['player'], event.key)
         if(iterations == vars.FRAME):
-            #MUSIC
-            music_actions.rand_music("end.wav")
             iterations = 0
-            #Loopify
-            interface_actions.update_xp(gc['interface'], gc['elems']['player'])
-            actions.update_enemies(gc)
-            actions.update_player(gc)
-            items_actions.update_door(gc['level'], ge['door1'], False)
-            items_actions.update_door(gc['level'], ge['door2'], True)
-            items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
-            items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
-            interface_actions.render_interface(gc['interface'])
+            actions.frame(gc, ge)
         else:
             iterations += 1
 
