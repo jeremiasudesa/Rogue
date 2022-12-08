@@ -16,7 +16,8 @@ def initLevel(gc):
 
 def initLevelItems(ge, level):
     
-    ge['door1'], ge['door2']= items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
+    if(ge.get('door1') == None):
+        ge['door1'], ge['door2']= items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)
     ge['trophy'] = None
     if(level.pickaxe != None): ge['pick'] = items.Pickaxe(level.pickaxe)
     if(level.orb != None): ge['orb'] = items.Orb(level.orb)
