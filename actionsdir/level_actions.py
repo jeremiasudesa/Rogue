@@ -12,7 +12,7 @@ import items
 import bisect
 
 def initLevel(gc):
-    gc['level'] = mapping.Level(vars.ROWS, vars.COLUMNS, 1000)
+    gc['level'] = mapping.Level(vars.ROWS, vars.COLUMNS, vars.ORIGIN_CHUNK)
 
 def initLevelItems(ge, level):
     ge['door1'], ge['door2'] = items.Door(1, 2, level.downStair), items.Door(1, 0, level.upStair)

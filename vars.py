@@ -1,5 +1,6 @@
 import pygame
 
+ORIGIN_CHUNK = 666
 PIXEL = 10
 ROWS = 90
 COLUMNS = 120

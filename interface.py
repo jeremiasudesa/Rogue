@@ -65,7 +65,7 @@ class Interface:
 
     def gameOver(self):
         self.fillScreen([255, 0, 0])
-        self.createText("GAME OVER", (vars.WIDTH//2, vars.HEIGHT//2), bgcolor = [255, 0, 0])
+        self.createText("GAME OVER", (vars.WIDTH//2, vars.HEIGHT//2), self.surf,  bgcolor = [255, 0, 0])
 
     def showRay(self, ray):
         for cell in ray:

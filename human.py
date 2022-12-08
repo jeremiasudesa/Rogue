@@ -8,5 +8,5 @@ class Human(Entity):
         self.XP = 0
         self.posarray = self.getPosRect(2, 2)
         self.inventory = {}
-        self.inventory['P'], self.inventory['O'] = None, None
+        self.inventory['P'], self.inventory['O'], self.inventory['T'] = None, None, None
 

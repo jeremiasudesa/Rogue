@@ -88,8 +88,12 @@ def update_playpos(gc):
         posloc = gc['level'].loc(pos)
         match posloc:
             case mapping.STAIR_DOWN:
-                if(level_actions.can_open(gc['level'], ge['player'].XP)):nxt_level(gc, 'd')
+                if(level_actions.can_open(gc['level'], ge['player'].XP)):
+                    nxt_level(gc, 'd')
+                    return
             case mapping.STAIR_UP:
+                if(gc['level'].seed == vars.ORIGIN_CHUNK):
+                    quit_or_win(ge['player'], gc['interface'])
                 nxt_level(gc, 'u')
                 return
             case mapping.PICKAXE:
@@ -122,7 +126,7 @@ def create_question():
 def game_over(interface):
     music_actions.play_song("end.mp3")
     interface.gameOver()
-    time.sleep(8)
+    time.sleep(8.5)
     pygame.display.quit()
     pygame.quit()
     sys.exit()
@@ -209,3 +213,12 @@ def update_enemies(gc):
     if(len(enems) == 0 and not changedLevel):
         gc['level'].curr_chunk.killed = True
         return
+
+def win_screen():
+    print("You Have Won!")
+
+def quit_or_win(player, interface):
+    if player_actions.in_inventory(player, 'T'):
+        win_screen()
+    else:
+        game_over(interface)
