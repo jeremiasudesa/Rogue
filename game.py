@@ -42,14 +42,12 @@ if __name__ == "__main__":
                     match event.key:
                         case pygame.K_p:
                             items_actions.use_pickup(ge['pick'], ge['player'])
-                        case pygame.K_SPACE:
-                            if(ge['player'].inventory['O']):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                         case pygame.K_o:
                             items_actions.use_pickup(ge['orb'], ge['player'])
+                        case pygame.K_SPACE:
+                            if(player_actions.in_inventory(ge['player'], 'O')):actions.death_ray(gc['level'], gc['interface'], ge['player']) 
                         case _:
-                            ge['player'].moving += 1 
-                            ge['player'].dir = tuple(vars.DIRS[vars.keys.index(event.key)])
-                            player_actions.handle_player_dir(ge['player'],event.key)
+                            player_actions.move(ge['player'], event.key)
         if(iterations == vars.FRAME):
             #MUSIC
             music_actions.rand_music("end.wav")
@@ -62,7 +60,7 @@ if __name__ == "__main__":
             items_actions.update_door(gc['level'], ge['door2'], True)
             items_actions.update_pickaxe(gc['level'], ge['pick'], ge['player'])
             items_actions.update_orb(gc['level'], ge['orb'], ge['player'])
-            gc['interface'].render()
+            interface_actions.render_interface(gc['interface'])
         else:
             iterations += 1
 

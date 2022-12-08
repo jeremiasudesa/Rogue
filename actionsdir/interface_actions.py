@@ -15,8 +15,11 @@ def initInterface(gc):
     gc['interface'].setSprites(gc['sprite_group'])
     gc['interface'].setBackground(gc['level'].tilemap)
 
-def updateBakground(interface, level):
+def update_background(interface, level):
     interface.setBackground(level.tilemap)
 
 def update_xp(interface, player):
     interface.drawCounter(player.XP)
+
+def render_interface(interface):
+    interface.render()

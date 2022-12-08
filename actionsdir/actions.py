@@ -66,7 +66,7 @@ def update_playpos(gc):
     dir = gc['level'].findBorder(nxtpos)
     if(dir[0] != 0):
         level_actions.nxt_chunk(gc, gc['level'], dir)
-        interface_actions.updateBakground(gc['interface'], gc['level'])
+        interface_actions.update_background(gc['interface'], gc['level'])
         chunkdir = [-dir[1][1], -dir[1][0]]
         nxtpos = ge['player'].nxtPosarray(dir[1])
         ge['player'].updatePos(nxtpos)

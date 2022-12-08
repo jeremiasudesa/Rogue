@@ -5,3 +5,11 @@ def handle_player_dir(player, key):
 
 def set_pvector(player, direction, angle):
     player.changeDir(direction, angle)
+
+def in_inventory(player, key):
+    return player.inventory[key] != None
+
+def move(player, key):
+    player.moving += 1 
+    player.dir = tuple(vars.DIRS[vars.keys.index(key)])
+    handle_player_dir(player,key)
